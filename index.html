@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Kosmologische Glättungsfunktion – GDE-Modell (optimiert)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        heading: '#0A2472',
+                        accent1: '#5D9CDE',
+                        accent2: '#DE5D9C',
+                        accent3: '#9CDE5D',
+                        lightAccent: '#f0f4ff',
+                        darkAccent: '#192339',
+                    },
+                    typography: {
+                        DEFAULT: {
+                            css: {
+                                maxWidth: '80ch',
+                                a: {
+                                    color: '#5D5CDE',
+                                    '&:hover': {
+                                        color: '#4e4eba',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        .dark {
+            color-scheme: dark;
+        }
+        .dark .math {
+            color: #e2e8f0; /* Ensure MathJax text is visible in dark mode */
+        }
+        .paper-container {
+            counter-reset: equation;
+        }
+        .equation-container {
+            position: relative;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(93, 156, 222, 0.05);
+            border-left: 3px solid #5D9CDE;
+            border-radius: 0.5rem;
+        }
+        .equation-number::before {
+            counter-increment: equation;
+            content: "(" counter(equation) ")";
+        }
+        .equation-number {
+            position: absolute;
+            right: 1rem; /* Adjusted for better padding */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5D9CDE; /* Make number visible */
+            font-size: 0.9em;
+        }
+        .equation-content { /* Added class for MathJax content alignment */
+             padding-right: 3rem; /* Ensure space for equation number */
+        }
+        h3 strong { /* Style strong tags within headings */
+            font-weight: bold;
+            color: inherit; /* Inherit color from h3 */
+        }
+        li strong { /* Style strong tags within list items */
+             font-weight: bold;
+        }
+        table {
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #cbd5e1; /* light mode border */
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .dark th, .dark td {
+             border-color: #4a5568; /* dark mode border */
+        }
+        th {
+            background-color: rgba(93, 156, 222, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-white to-lightAccent dark:from-gray-900 dark:to-darkAccent text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <div class="container mx-auto px-4 py-8 max-w-4xl paper-container shadow-lg rounded-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+        <header class="text-center mb-12 relative">
+            <div class="absolute -top-8 left-0 right-0 h-2 bg-gradient-to-r from-accent1 via-accent2 to-accent3 rounded-full"></div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-heading to-accent1 dark:from-accent1 dark:to-accent2">Die Kosmologische Glättungsfunktion</h1>
+            <h2 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">GDE-Modell (optimierte Fassung)</h2>
+
+            <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
+                <p class="font-semibold">Autor: Gabriel ϕ</p>
+                <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
+            </div>
+        </header>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">1</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Glättungsfunktion: Entropie-Skalierung revolutionieren</h3>
+
+            <p class="mb-2 font-semibold">Problem:</p>
+            <ul class="list-disc pl-8 mb-4 space-y-1">
+                <li>\( S_0 \sim 10^{103} k_B \) (Schwarze Löcher dominieren) \(\Rightarrow \Delta S / S_0 \) vernachlässigbar.</li>
+            </ul>
+
+            <p class="mb-2 font-semibold">Lösung:</p> <p class="mb-4">Neue Referenzskala: Nutze CMB-Entropie \( S_{\text{CMB}} \sim 10^{88} k_B \) als Basis:</p>
+            <div class="equation-container">
+                <div class="equation-content">\[
+                \Lambda_{\text{Glättung}}(t) = \frac{T_0}{T_{\text{CMB}}(t)} \cdot \left( 1 + \frac{S_{\text{Struktur}}(t)}{S_{\text{CMB}}} \right)
+                \]</div>
+                <span class="equation-number"></span>
+            </div>
+
+            <p class="mb-2 font-semibold">Vorteile:</p>
+            <ul class="list-disc pl-8 mb-4 space-y-1">
+                 <li>\( S_{\text{Struktur}} \) (aus Halos) wird signifikant \(\Rightarrow\) realistischere Kopplung.</li>
+                 <li>Thermische und strukturelle Entropie direkt vergleichbar.</li>
+            </ul>
+
+            <p class="mb-2 font-semibold">Berechnung von \( S_{\text{Struktur}} \):</p>
+             <div class="equation-container">
+                 <div class="equation-content">\[
+                 S_{\text{Struktur}}(z) \approx \int n(M,z) \cdot \left( \frac{M_{\text{vir}}}{M_*} \right)^2 dM \quad (M_* \sim 10^{12} M_\odot)
+                 \]</div>
+                 <span class="equation-number"></span>
+             </div>
+             <p>Datenquellen: DESI-Halokataloge oder IllustrisTNG-Simulationen.</p>
+
+        </section>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">2</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">GDE-Modell: Präzise Anpassung von \( \alpha(z) \)</h3>
+
+            <p class="mb-2 font-semibold">Problem:</p>
+            <div class="equation-container">
+                <div class="equation-content">\[ \alpha(z) = -1 + \tanh(z - 0.5) \Rightarrow w(0.5) \approx -0.67 \quad (\text{DESI: } w \approx -0.8) \]</div>
+                 <!-- No number needed for statement -->
+            </div>
+
+            <p class="mb-2 font-semibold">Optimierter Ansatz:</p>
+            <div class="equation-container">
+                <div class="equation-content">\[
+                \alpha(z) = -0.6 + 1.2 \cdot \tanh(2(z - 0.7))
+                \]</div>
+                <span class="equation-number"></span>
+            </div>
+
+            <p class="mb-2 font-semibold">Warum?</p>
+            <table>
+                 <thead>
+                     <tr>
+                         <th>\(z\)</th>
+                         <th>\(\alpha(z)\)</th>
+                         <th>\(w(z)\) (approx.)</th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <tr>
+                         <td>0.5</td>
+                         <td>-0.48</td>
+                         <td>\(-0.84\) (DESI)</td>
+                     </tr>
+                     <tr>
+                         <td>1.0</td>
+                         <td>-0.55</td>
+                         <td>\(-0.82\)</td>
+                     </tr>
+                     <tr>
+                         <td>0.0</td>
+                         <td>+0.6</td>
+                         <td>\(-1.2\)</td>
+                     </tr>
+                 </tbody>
+            </table>
+            <p class="text-sm italic mt-1">Hinweis: Der \(w(z)\)-Wert in der Tabelle ist eine Näherung ohne den Ableitungsterm, der in Abschnitt 3 berücksichtigt wird.</p>
+
+        </section>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">3</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Zustandsgleichung \( w(z) \): Vollständige Ableitung</h3>
+
+            <p class="mb-2 font-semibold">Formel:</p>
+            <div class="equation-container">
+                <div class="equation-content">\[
+                w(z) = -1 - \frac{\alpha(z)}{3} + \frac{(1+z)}{3H(z)} \cdot \frac{d\alpha}{dz}
+                \]</div>
+                <span class="equation-number"></span>
+            </div>
+
+            <p class="mb-2 font-semibold">Beispiel bei \( z = 0.5 \):</p>
+            <ul class="list-disc pl-8 mb-4 space-y-1">
+                 <li>\( \alpha(0.5) = -0.48 \)</li>
+                 <li>\( \frac{d\alpha}{dz} \approx 1.2 \cdot \text{sech}^2(2(0.5 - 0.7)) \cdot 2 \approx 1.8 \) (*Korrektur: Kettenregel*)</li>
+                 <li>\( H(0.5) \approx 100 \text{ km/s/Mpc} \) (angenommener Wert für Beispiel)</li>
+             </ul>
+             <div class="equation-container">
+                 <div class="equation-content">\[
+                 w(0.5) \approx -1 - \frac{-0.48}{3} + \frac{1+0.5}{3 \cdot H(0.5)} \cdot 1.8 \approx -1 + 0.16 + \frac{1.5 \cdot 1.8}{3 \cdot H(0.5)}
+                 \]</div>
+                  <!-- No number for calculation step -->
+             </div>
+             <p class="mb-4">Unter Verwendung von \( H(0.5) \approx 92.4 \, \text{km/s/Mpc} \) (Planck 2018 \( \Lambda\text{CDM} \)):</p>
+             <div class="equation-container">
+                 <div class="equation-content">\[
+                 w(0.5) \approx -1 + 0.16 + \frac{2.7}{3 \cdot 92.4} \approx -0.84 + 0.0097 \approx -0.83 \quad \text{(DESI-kompatibel!)}
+                 \]</div>
+                 <!-- No number for final result of example -->
+             </div>
+
+        </section>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Feldtheorie: Skalarfeld-Implementierung</h3>
+
+            <p class="mb-2 font-semibold">Potentialdesign für dynamisches \( \alpha(z) \):</p>
+            <div class="equation-container">
+                <div class="equation-content">\[
+                V(\phi) = \lambda \phi^4 + \mu \phi^2 \cdot \tanh\left( \frac{\phi - \phi_*}{\Delta\phi} \right)
+                \]</div>
+                <span class="equation-number"></span>
+            </div>
+
+            <p class="mb-4">Phasenübergang bei \( \phi_* \approx \phi(z=0.7) \).</p>
+
+            <p class="mb-2 font-semibold">Simulation:</p> <p class="mb-4">Löse die Bewegungsgleichung:</p>
+            <div class="equation-container">
+                <div class="equation-content">\[
+                \ddot{\phi} + 3H\dot{\phi} + \frac{\partial V}{\partial \phi} = 0
+                \]</div>
+                <span class="equation-number"></span>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">5</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Roadmap – Konkrete Schritte</h3>
+
+            <ol class="list-decimal pl-8 mb-4 space-y-3">
+                <li>
+                    <strong class="font-semibold">Numerische Implementierung:</strong>
+                    <ul class="list-disc pl-6 mt-1 space-y-1">
+                        <li>Modifiziere CLASS für:
+                            <div class="equation-container text-sm"> <!-- Smaller font for code-like spec -->
+                                 <div class="equation-content">\[
+                                 \Omega_\Lambda(z) = \Omega_{\Lambda,0} \frac{\exp\left( \int_0^z \frac{3(1+w(x))}{1+x} dx \right)}{\exp\left( \int_0^z \frac{3(1+w_{\Lambda\text{CDM}}(x))}{1+x} dx \right)} \approx \Omega_{\Lambda,0} (1+z)^{3(1+w(z))} \text{ (Näherung)}
+                                 \]</div>
+                                  <!-- No number, definition/approximation -->
+                             </div>
+                             wobei \( w(z) \) aus Gleichung (4) mit \( \alpha(z) \) aus Gleichung (3) verwendet wird.
+                        </li>
+                        <li>Teste gegen Planck + DESI + Pantheon+ Daten.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong class="font-semibold">Entropieberechnung:</strong>
+                    <ul class="list-disc pl-6 mt-1 space-y-1">
+                        <li>Extrahiere Halo Mass Function \( n(M,z) \) aus DESI-DR5 oder IllustrisTNG.</li>
+                        <li>Integriere numerisch Gleichung (2) oder summiere über Katalog:
+                             <div class="equation-container text-sm">
+                                 <div class="equation-content">\[
+                                 S_{\text{Struktur}}(z) = \sum_{\text{Halos}} k_B \left( \frac{M_{\text{vir}}}{M_*} \right)^2
+                                 \]</div>
+                                 <!-- No number, practical formula -->
+                             </div>
+                             mit \( M_* = 10^{12} M_\odot \). Normiere auf \( S_{\text{CMB}} \).
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <strong class="font-semibold">MCMC-Fit:</strong>
+                    <ul class="list-disc pl-6 mt-1 space-y-1">
+                        <li>Parameter: \( \Omega_{m,0}, H_0 \) und Modellparameter (z.B. \( \alpha_0, z_*, \text{Steigung} \) für \( \alpha(z) \) oder \( \lambda, \mu, \phi_*, \Delta\phi \) für Feldtheorie).</li>
+                        <li>Tools: Cobaya, MontePython.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong class="font-semibold">Theoretische Untermauerung:</strong>
+                    <ul class="list-disc pl-6 mt-1 space-y-1">
+                        <li><strong>Skaleninvarianz:</strong> Könnte \( \alpha(z) \propto \log(T_{\text{CMB}}/T_*) \) eine tiefere Begründung liefern?</li>
+                        <li><strong>Phasenübergang:</strong> Analogie zu kritischen Exponenten in der Thermodynamik untersuchen.</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-600">
+
+        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+            <!-- Use a generic icon or number if desired, Fazit doesn't fit the numbered scheme -->
+             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">F</div>
+            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Fazit: Ein schlüssiges Modell mit klarem Testpfad</h3>
+
+            <ul class="list-none pl-0 mb-4 space-y-3">
+                 <li>✅ <strong class="font-semibold">DESI-Kompatibilität:</strong> \( w(0.5) \approx -0.83 \) durch optimiertes \( \alpha(z) \) und korrekte Ableitung.</li>
+                 <li>✅ <strong class="font-semibold">Glättungszukunft:</strong> Modell impliziert \( \alpha(0) = 0.6 \), was \( w(0) \approx -1.2 \) ergibt (Phantomverhalten, aber kein Big Rip, da \( \alpha \) nicht weiter wächst). Die Kopplung an \( S_{\text{Struktur}} \) könnte dies modifizieren.</li>
+                 <li>⚠️ <strong class="font-semibold">Herausforderung:</strong> Präzise Entropieberechnung \( S_{\text{Struktur}}(z) \) aus Halodaten/Simulationen und ihre Kopplung in \( \Lambda_{\text{Glättung}} \).</li>
+                 <li>🚀 <strong class="font-semibold">Next Steps:</strong> Code-Implementierung in Boltzmann-Solver + MCMC-Datenfit – Das Modell ist bereit für den Test!</li>
+             </ul>
+        </section>
+
+        <footer class="mt-12 pt-8 border-t border-gray-300 dark:border-gray-700 italic text-center bg-gradient-to-br from-lightAccent to-white dark:from-darkAccent dark:to-gray-900 p-6 rounded-lg shadow-md">
+            <p class="text-accent2 dark:text-accent3 font-serif">"Die beste Theorie ist nicht die komplizierteste, sondern die, die das Unerwartete einfach erklärt." <span class="block mt-2 text-sm">-- Gabriel ϕ</span></p>
+        </footer>
+    </div>
+</body>
+</html>

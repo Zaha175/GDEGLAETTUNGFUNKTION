@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
+<!DOCTYPE html><html lang="de"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GDE-Modell Explorer</title>
@@ -228,8 +226,8 @@
 
         <!-- Tab Navigation -->
         <div class="flex overflow-x-auto space-x-2 md:space-x-4 border-b border-gray-300 dark:border-gray-700 mb-8 sticky top-0 bg-white/90 dark:bg-gray-900/90 z-10 backdrop-blur-sm">
-            <button class="tab-button active px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="big-freeze">Big Freeze & Thermodynamik</button>
-            <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="dunkle-materie">CMB & Dunkle Materie</button>
+            <button class="tab-button active px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="big-freeze">Big Freeze &amp; Thermodynamik</button>
+            <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="dunkle-materie">CMB &amp; Dunkle Materie</button>
             <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="glattung-graph">CLASS-Test Analyse</button>
             <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="glattung">Glättungsfunktion</button>
         </div>
@@ -238,7 +236,7 @@
         <div class="tab-content active paper-container" id="big-freeze">
             <header class="text-center mb-12">
                 <h2 class="text-2xl md:text-3xl font-bold mb-4 text-heading dark:text-accent1">Vertiefte Analyse des GDE-Modells</h2>
-                <h3 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">Big Freeze & Thermodynamische Kosmologie</h3>
+                <h3 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">Big Freeze &amp; Thermodynamische Kosmologie</h3>
                 <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
                     <p class="font-semibold">Autor: Gabriel ϕ</p>
                     <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
@@ -327,7 +325,7 @@
                     </li>
                     <li><strong class="font-semibold">Phantom-Problem bei \(z=0\):</strong>
                         <ul class="list-disc pl-6 mt-1 space-y-1">
-                            <li>Der Wert \(w(0) \approx -1.2\) (basierend auf der Formel für \(w(z)\) und \(\alpha(0) = 0.6\)) liegt im Phantom-Bereich (\(w < -1\)), was oft mit theoretischen Instabilitäten (z.B. Geister-Freiheitsgraden) verbunden ist. Kann das Modell dies vermeiden oder konsistent erklären? Ist dieses Verhalten transient?</li>
+                            <li>Der Wert \(w(0) \approx -1.2\) (basierend auf der Formel für \(w(z)\) und \(\alpha(0) = 0.6\)) liegt im Phantom-Bereich (\(w &lt; -1\)), was oft mit theoretischen Instabilitäten (z.B. Geister-Freiheitsgraden) verbunden ist. Kann das Modell dies vermeiden oder konsistent erklären? Ist dieses Verhalten transient?</li>
                         </ul>
                     </li>
                 </ul>
@@ -462,7 +460,7 @@
 
             <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
-                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Vorhersagen & Testbarkeit</h3>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Vorhersagen &amp; Testbarkeit</h3>
 
                 <ol class="list-decimal pl-8 mb-4 space-y-3">
                     <li>
@@ -539,7 +537,7 @@
                     <button id="resetParams" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">Zurücksetzen</button>
                     <button id="downloadData" class="px-3 py-1 bg-primary text-white rounded-full hover:bg-opacity-90 text-sm flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
                         Daten (JSON)
                     </button>
@@ -593,7 +591,7 @@
                         <canvas id="AlphaChart"></canvas>
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400 mt-2 p-2 bg-purple-50 dark:bg-purple-900/30 rounded">
-                        Der Exponent α(z) bestimmt das Verhalten der Dunklen Energie. Bei α > 0 liegt w im Phantom-Bereich (w < -1), bei α < 0 im Quintessenz-Bereich (w > -1).
+                        Der Exponent α(z) bestimmt das Verhalten der Dunklen Energie. Bei α &gt; 0 liegt w im Phantom-Bereich (w &lt; -1), bei α &lt; 0 im Quintessenz-Bereich (w &gt; -1).
                     </div>
                 </div>
                 
@@ -1884,5 +1882,6 @@
             }
         };
     </script>
-</body>
-</html>
+
+
+</body></html>

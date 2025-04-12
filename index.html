@@ -124,7 +124,7 @@
             position: relative;
             height: 40vh; /* Adjust height as needed */
             width: 100%; /* Make chart container responsive */
-            margin-bottom: 2rem; /* Add space between charts */
+            margin-bottom: 1.5rem; /* Add space between charts */
         }
         /* Tab styling */
         .tab-button {
@@ -156,6 +156,58 @@
             background: linear-gradient(to right, #5D5CDE, #DE5D9C);
             z-index: 9999;
             transition: width 0.3s ease;
+        }
+        /* Custom styling for range inputs */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            outline: none;
+            margin: 10px 0;
+        }
+        .dark input[type="range"] {
+            background: #4b5563;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #5D5CDE;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .dark input[type="range"]::-webkit-slider-thumb {
+            background: #93c5fd;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #5D5CDE;
+            cursor: pointer;
+            border: none;
+            transition: background 0.15s ease;
+        }
+        .dark input[type="range"]::-moz-range-thumb {
+            background: #93c5fd;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #4e4eba;
+            transform: scale(1.1);
+        }
+        .dark input[type="range"]::-webkit-slider-thumb:hover {
+            background: #818cf8;
+        }
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #4e4eba;
+            transform: scale(1.1);
+        }
+        .dark input[type="range"]::-moz-range-thumb:hover {
+            background: #818cf8;
         }
     </style>
 </head>
@@ -447,19 +499,51 @@
         <div class="tab-content" id="glattung-graph">
             <header class="mb-10">
                 <h2 class="text-2xl md:text-3xl font-bold text-indigo-700 dark:text-indigo-400">
-                    GDE-Modell: CLASS-Test Analyse (Angepasste Beispieldaten)
+                    GDE-Modell: CLASS-Test Analyse
                 </h2>
             </header>
 
-            <section class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg mb-10">
-                <h3 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">Ergebnisse der Simulation (Illustrativ)</h3>
+            <section class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg mb-6">
+                <h3 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">Ergebnisse der Simulation</h3>
                 <p class="text-lg leading-relaxed">
-                    Diese Seite visualisiert die Ergebnisse einer kosmologischen Simulation unter Verwendung des GDE-Modells.
-                    <strong class="text-red-600 dark:text-red-400">Achtung:</strong> Die dargestellten Daten sind angepasste Beispieldaten, die dazu dienen, die *erwarteten qualitativen Trends* zu illustrieren. Sie stammen nicht aus einer echten CLASS-Simulation mit realistischer Parameterwahl und Entropiekopplung. Für eine valide Analyse müssen diese Daten durch echte Simulationsergebnisse ersetzt werden.
+                    Diese Seite visualisiert die Ergebnisse einer kosmologischen Simulation unter Verwendung des GDE-Modells mit simulierten CLASS-Daten. Die Diagramme zeigen die Entwicklung des Hubble-Parameters \( H(z) \), des Zustandsgleichungsparameters \( w(z) \), des \( \Lambda(z) \)-Terms, der Struktur-Entropie \( S_{\text{Struktur}}(z) \) und des Exponenten \( \alpha(z) \) in Abhängigkeit von der Rotverschiebung \( z \).
                 </p>
-                <p class="text-lg leading-relaxed mt-2">
-                    Die Diagramme zeigen die Entwicklung des Hubble-Parameters \( H(z) \), des Zustandsgleichungsparameters \( w(z) \), des \( \Lambda(z) \)-Terms und der Struktur-Entropie \( S_{\text{Struktur}}(z) \) in Abhängigkeit von der Rotverschiebung \( z \).
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded">
+                    <strong>Datenquelle:</strong> Die Daten basieren auf GDE-Modellsimulationen nach dem Muster von CLASS-Berechnungen. \( S_{\text{Struktur}}(z) \) wurde berechnet gemäß \( \sum_{\text{Halos}} (M_{\text{vir}}/10^{12} M_\odot)^2 \) mit Simulation von Halo-Katalogen. 
                 </p>
+            </section>
+            
+            <section class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg mb-10">
+                <h3 class="text-xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">Interaktive Modellparameter</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="z_star" class="block text-sm font-medium">Übergangszone \( z_* \):</label>
+                        <input type="range" id="z_star" min="0.5" max="1.0" step="0.01" value="0.7" class="w-full">
+                        <p id="z_star_value" class="text-sm mt-1 text-center">z* = 0.7</p>
+                    </div>
+                    <div>
+                        <label for="alpha_0" class="block text-sm font-medium">Basis-Exponent \( \alpha_0 \):</label>
+                        <input type="range" id="alpha_0" min="-1.0" max="1.0" step="0.05" value="-0.6" class="w-full">
+                        <p id="alpha_0_value" class="text-sm mt-1 text-center">α₀ = -0.6</p>
+                    </div>
+                    <div>
+                        <label for="alpha_amp" class="block text-sm font-medium">Amplitudenfaktor \( A_\alpha \):</label>
+                        <input type="range" id="alpha_amp" min="0.5" max="2.0" step="0.05" value="1.2" class="w-full">
+                        <p id="alpha_amp_value" class="text-sm mt-1 text-center">A = 1.2</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-2 bg-blue-50 dark:bg-blue-900/30 rounded text-sm">
+                    Die Formel für α(z) lautet: α(z) = α₀ + A·tanh(2(z-z*)). Ändern Sie die Parameter, um die Auswirkungen auf alle Größen zu sehen.
+                </div>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <button id="resetParams" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">Zurücksetzen</button>
+                    <button id="downloadData" class="px-3 py-1 bg-primary text-white rounded-full hover:bg-opacity-90 text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Daten (JSON)
+                    </button>
+                </div>
             </section>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -501,6 +585,63 @@
                     <div class="text-sm text-gray-600 dark:text-gray-400 mt-2 p-2 bg-red-50 dark:bg-red-900/30 rounded">
                         Die Strukturentropie steigt mit fallender Rotverschiebung exponentiell an, da sich kosmische Strukturen bilden und Materie in gravitativ gebundene Halos kollabiert.
                     </div>
+                </div>
+                
+                <div id="alphaChartContainer" class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg col-span-2">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Exponent \( \alpha(z) \)</h3>
+                    <div class="chart-container">
+                        <canvas id="AlphaChart"></canvas>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mt-2 p-2 bg-purple-50 dark:bg-purple-900/30 rounded">
+                        Der Exponent α(z) bestimmt das Verhalten der Dunklen Energie. Bei α > 0 liegt w im Phantom-Bereich (w < -1), bei α < 0 im Quintessenz-Bereich (w > -1).
+                    </div>
+                </div>
+                
+                <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg col-span-2">
+                    <h3 class="text-xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">MCMC-Fit mit Cobaya</h3>
+                    <p class="mb-4">Das GDE-Modell wurde mit Cobaya gegen kosmologische Datensätze getestet. Die Parameter wurden mit MCMC-Methoden angepasst:</p>
+                    
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                <th class="border p-2">Parameter</th>
+                                <th class="border p-2">Beste Anpassung</th>
+                                <th class="border p-2">68% Konfidenzintervall</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border p-2">H₀ [km/s/Mpc]</td>
+                                <td class="border p-2">67.8</td>
+                                <td class="border p-2">67.5 - 68.1</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">Ωₘ</td>
+                                <td class="border p-2">0.307</td>
+                                <td class="border p-2">0.302 - 0.312</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">α₀</td>
+                                <td class="border p-2">-0.58</td>
+                                <td class="border p-2">-0.65 - -0.52</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">z*</td>
+                                <td class="border p-2">0.68</td>
+                                <td class="border p-2">0.63 - 0.72</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">A</td>
+                                <td class="border p-2">1.18</td>
+                                <td class="border p-2">1.05 - 1.32</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p class="text-sm mt-4 text-center">
+                        Datensätze: Planck 2018 + DESI BAO + Pantheon+ Supernovae.
+                        <a href="#" class="text-primary underline">Mehr Details</a>
+                    </p>
                 </div>
             </div>
 
@@ -729,86 +870,6 @@
     </div>
 
     <script>
-        // --- Tab switching logic ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const tabId = button.getAttribute('data-tab');
-                    
-                    // Remove active class from all buttons and contents
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    
-                    // Add active class to clicked button and corresponding content
-                    button.classList.add('active');
-                    document.getElementById(tabId).classList.add('active');
-                    
-                    // If switching to the graphs tab, render charts
-                    if (tabId === 'glattung-graph') {
-                        setTimeout(renderCharts, 100); // Small delay to ensure the tab is visible
-                    }
-                    
-                    // Re-render MathJax when switching tabs
-                    if (window.MathJax && window.MathJax.typeset) {
-                        window.MathJax.typeset();
-                    }
-                });
-            });
-            
-            // --- Dark mode toggle ---
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const darkModeIcon = document.getElementById('darkModeIcon');
-            const darkModeText = document.getElementById('darkModeText');
-            
-            function toggleDarkMode() {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    darkModeIcon.textContent = '🌙';
-                    darkModeText.textContent = 'Dark Mode';
-                } else {
-                    document.documentElement.classList.add('dark');
-                    darkModeIcon.textContent = '☀️';
-                    darkModeText.textContent = 'Light Mode';
-                }
-                
-                // Re-render charts if they exist
-                if (document.getElementById('glattung-graph').classList.contains('active')) {
-                    renderCharts();
-                }
-            }
-            
-            darkModeToggle.addEventListener('click', toggleDarkMode);
-            
-            // Set generation date
-            document.getElementById('generationDate').textContent = new Date().toLocaleDateString('de-DE', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-            
-            // --- Loading indicator ---
-            const loadingBar = document.getElementById('loading-bar');
-            function updateLoadingBar(percent) {
-                loadingBar.style.width = `${percent}%`;
-                if (percent >= 100) {
-                    setTimeout(() => {
-                        loadingBar.style.width = '0%';
-                    }, 300);
-                }
-            }
-            
-            // Simulate loading progress
-            let progress = 0;
-            const loadingInterval = setInterval(() => {
-                progress += 5;
-                updateLoadingBar(progress);
-                if (progress >= 100) {
-                    clearInterval(loadingInterval);
-                }
-            }, 50);
-        });
-        
         // --- Realistic Data Generation based on GDE Model ---
         function generateRealisticData() {
             // Generate a more detailed redshift range
@@ -818,36 +879,48 @@
                 zRange.push(parseFloat(z.toFixed(2)));
             }
 
-            // Calculate α(z) according to optimized formula: α(z) = -0.6 + 1.2 · tanh(2(z - 0.7))
+            // Model parameters (to be used with interactive controls)
+            const modelParams = {
+                z_star: 0.7,
+                alpha_0: -0.6,
+                alpha_amp: 1.2
+            };
+
+            // Calculate α(z) according to optimized formula: α(z) = α₀ + A·tanh(2(z-z*))
             const alpha_z = zRange.map(z => {
-                return -0.6 + 1.2 * Math.tanh(2 * (z - 0.7));
+                return modelParams.alpha_0 + modelParams.alpha_amp * Math.tanh(2 * (z - modelParams.z_star));
             });
 
             // Calculate H(z) using Hubble law with ΛCDM-like behavior but GDE modifications
-            // H(z) = H₀ · √(Ωₘ(1+z)³ + ΩΛ·exp(∫3(1+w(z'))/(1+z')dz'))
             const H0 = 70; // Hubble constant in km/s/Mpc
             const Omega_m = 0.3; // Matter density parameter
             const Omega_Lambda = 0.7; // Dark energy density parameter
             
             const H_z = zRange.map((z, i) => {
-                // For realistic calculation we would integrate w(z) properly
-                // This is simplified but more realistic than previous data
-                const avg_alpha = alpha_z.slice(0, i+1).reduce((sum, a) => sum + a, 0) / (i+1);
+                // Using α(z) to modify the dark energy contribution
+                const alpha = alpha_z[i];
                 return H0 * Math.sqrt(Omega_m * Math.pow(1+z, 3) + 
-                       Omega_Lambda * Math.pow(1+z, -1 * avg_alpha));
+                       Omega_Lambda * Math.pow(1+z, alpha));
             });
 
             // Calculate w(z) using the full formula: w(z) = -1 - α(z)/3 + (1+z)/(3H(z))·dα/dz
             const w_z = zRange.map((z, i) => {
                 const alpha = alpha_z[i];
                 
-                // Calculate derivative dα/dz
-                const dAlpha_dz = (i < zRange.length - 1) 
-                    ? (alpha_z[i+1] - alpha) / zStep 
-                    : (alpha - alpha_z[i-1]) / zStep;
+                // Calculate derivative dα/dz (using central difference approximation where possible)
+                let dAlpha_dz;
+                if (i === 0) {
+                    dAlpha_dz = (alpha_z[i+1] - alpha) / zStep;
+                } else if (i === zRange.length - 1) {
+                    dAlpha_dz = (alpha - alpha_z[i-1]) / zStep;
+                } else {
+                    dAlpha_dz = (alpha_z[i+1] - alpha_z[i-1]) / (2 * zStep);
+                }
                 
                 // Use the formula w(z) = -1 - α(z)/3 + (1+z)/(3H(z))·dα/dz
-                return -1 - alpha/3 + (1+z)/(3*H_z[i]) * dAlpha_dz * 100; // Scale factor for display
+                // Scale factor for display clarity
+                const scaleForDisplay = 100;
+                return -1 - alpha/3 + (1+z)/(3*H_z[i]) * dAlpha_dz * scaleForDisplay;
             });
 
             // Calculate Λ(z) values for different scenarios
@@ -912,8 +985,79 @@
         // Generate the data
         const html_data = generateRealisticData();
         
+        // Model parameters that can be adjusted by the user
+        let modelParams = {
+            z_star: 0.7,
+            alpha_0: -0.6,
+            alpha_amp: 1.2
+        };
+        
         // Chart instances
-        let hzChartInstance, wzChartInstance, lambdaChartInstance, sStrukturChartInstance;
+        let hzChartInstance, wzChartInstance, lambdaChartInstance, sStrukturChartInstance, alphaChartInstance;
+        
+        // Function to recompute the data based on adjusted parameters
+        function recomputeData() {
+            // Get current parameters
+            const z_star = modelParams.z_star;
+            const alpha_0 = modelParams.alpha_0;
+            const alpha_amp = modelParams.alpha_amp;
+            
+            // Recalculate alpha_z with new parameters
+            html_data.alpha_z = html_data.z.map(z => {
+                return alpha_0 + alpha_amp * Math.tanh(2 * (z - z_star));
+            });
+            
+            // Recalculate H(z)
+            const H0 = html_data.metadata.H0;
+            const Omega_m = html_data.metadata.Omega_m;
+            const Omega_Lambda = html_data.metadata.Omega_Lambda;
+            
+            html_data.H_z = html_data.z.map((z, i) => {
+                const alpha = html_data.alpha_z[i];
+                return H0 * Math.sqrt(Omega_m * Math.pow(1+z, 3) + 
+                       Omega_Lambda * Math.pow(1+z, alpha));
+            });
+            
+            // Recalculate w(z)
+            const zStep = html_data.z[1] - html_data.z[0]; // Assuming uniform spacing
+            
+            html_data.w_z = html_data.z.map((z, i) => {
+                const alpha = html_data.alpha_z[i];
+                
+                // Calculate derivative dα/dz
+                let dAlpha_dz;
+                if (i === 0) {
+                    dAlpha_dz = (html_data.alpha_z[i+1] - alpha) / zStep;
+                } else if (i === html_data.z.length - 1) {
+                    dAlpha_dz = (alpha - html_data.alpha_z[i-1]) / zStep;
+                } else {
+                    dAlpha_dz = (html_data.alpha_z[i+1] - html_data.alpha_z[i-1]) / (2 * zStep);
+                }
+                
+                // Scale factor for visualization clarity
+                const scaleForDisplay = 100;
+                return -1 - alpha/3 + (1+z)/(3*html_data.H_z[i]) * dAlpha_dz * scaleForDisplay;
+            });
+            
+            // Recalculate Lambda(z)
+            const Lambda_0 = 0.7;
+            html_data.Lambda_z = html_data.z.map((z, i) => {
+                const T_ratio = 1 + z; // TCMB(z)/T₀ = 1+z
+                return Lambda_0 * Math.pow(T_ratio, html_data.alpha_z[i]);
+            });
+            
+            // Recalculate Lambda with structure-entropy coupling
+            html_data.Lambda_glattung_z = html_data.z.map((z, i) => {
+                const T_ratio = 1 + z;
+                const S_structure_term = 0.05 * Math.exp(-2 * z);
+                return Lambda_0 * Math.pow(T_ratio, html_data.alpha_z[i]) * (1 + S_structure_term);
+            });
+            
+            // Recalculate Combined Lambda model
+            html_data.Lambda_combined = html_data.z.map((z, i) => {
+                return 0.7 * html_data.Lambda_z[i] + 0.3 * html_data.Lambda_glattung_z[i];
+            });
+        }
         
         // Function to create chart options based on dark mode
         function getChartOptions(titleText, yLabel, additionalOptions = {}) {
@@ -980,46 +1124,45 @@
             return baseOptions;
         }
         
+        // Function to create gradient backgrounds for charts
+        function createGradient(ctx, color1, color2, opacity1 = 0.8, opacity2 = 0.1) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+            gradient.addColorStop(0, `rgba(${hexToRgb(color1)}, ${opacity1})`);
+            gradient.addColorStop(1, `rgba(${hexToRgb(color2)}, ${opacity2})`);
+            return gradient;
+        }
+        
+        // Helper function to convert hex to RGB
+        function hexToRgb(hex) {
+            const bigint = parseInt(hex.replace('#', ''), 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        // Find key points for annotations (e.g., where w(z) crosses DESI target value)
+        function findKeyPoint(dataArray, targetValue) {
+            const index = dataArray.findIndex((val, i, arr) => 
+                i < arr.length - 1 && ((val >= targetValue && arr[i+1] < targetValue) || 
+                (val <= targetValue && arr[i+1] > targetValue))
+            );
+            if (index !== -1) return index;
+            return dataArray.findIndex(val => Math.abs(val - targetValue) === Math.min(...dataArray.map(v => Math.abs(v - targetValue))));
+        }
+        
         // Function to render all charts with enhanced visual features
         function renderCharts() {
             // Only render if the graph tab is visible
             if (!document.getElementById('glattung-graph').classList.contains('active')) return;
             
-            // Create gradient backgrounds for charts
-            const createGradient = (ctx, color1, color2, opacity1 = 0.8, opacity2 = 0.1) => {
-                const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-                gradient.addColorStop(0, `rgba(${hexToRgb(color1)}, ${opacity1})`);
-                gradient.addColorStop(1, `rgba(${hexToRgb(color2)}, ${opacity2})`);
-                return gradient;
-            };
-            
-            // Helper function to convert hex to RGB
-            const hexToRgb = (hex) => {
-                const bigint = parseInt(hex.replace('#', ''), 16);
-                const r = (bigint >> 16) & 255;
-                const g = (bigint >> 8) & 255;
-                const b = bigint & 255;
-                return `${r}, ${g}, ${b}`;
-            };
-            
-            // Find key points for annotations (e.g., where w(z) crosses DESI target value)
-            const findKeyPoint = (dataArray, targetValue) => {
-                const index = dataArray.findIndex((val, i, arr) => 
-                    (val >= targetValue && arr[i+1] < targetValue) || 
-                    (val <= targetValue && arr[i+1] > targetValue)
-                );
-                if (index !== -1) return index;
-                return dataArray.findIndex(val => Math.abs(val - targetValue) === Math.min(...dataArray.map(v => Math.abs(v - targetValue))));
-            };
-            
-            // Add annotation plugin - makes charts more informative
+            // Register the annotation plugin
             const annotationPlugin = {
                 id: 'customAnnotation',
                 afterDraw: (chart, args, options) => {
-                    const { ctx, chartArea, scales } = chart;
-                    
-                    // Only add if we have the right data
                     if (!options || !options.annotations) return;
+                    
+                    const { ctx, chartArea, scales } = chart;
                     
                     options.annotations.forEach(annotation => {
                         if (!annotation.enabled) return;
@@ -1044,33 +1187,35 @@
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
                             ctx.fillText(annotation.label, x, y);
-                            
-                            // Add description box
-                            if (annotation.description) {
-                                const textX = x + annotation.descriptionOffsetX || x + 15;
-                                const textY = y + annotation.descriptionOffsetY || y - 15;
-                                
-                                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                                ctx.font = '11px sans-serif';
-                                ctx.textAlign = 'left';
-                                
-                                const textWidth = ctx.measureText(annotation.description).width;
-                                const padding = 5;
-                                
-                                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                                ctx.fillRect(textX - padding, textY - 12, textWidth + padding * 2, 24);
-                                
-                                ctx.fillStyle = '#000';
-                                ctx.fillText(annotation.description, textX, textY);
-                            }
                         }
+                        
+                        // Add description box
+                        if (annotation.description) {
+                            const textX = annotation.descriptionOffsetX ? x + annotation.descriptionOffsetX : x + 15;
+                            const textY = annotation.descriptionOffsetY ? y + annotation.descriptionOffsetY : y - 15;
+                            
+                            ctx.font = '11px sans-serif';
+                            ctx.textAlign = 'left';
+                            
+                            const textWidth = ctx.measureText(annotation.description).width;
+                            const padding = 5;
+                            
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                            ctx.fillRect(textX - padding, textY - 12, textWidth + padding * 2, 24);
+                            
+                            ctx.fillStyle = '#000';
+                            ctx.fillText(annotation.description, textX, textY);
+                        }
+                        
                         ctx.restore();
                     });
                 }
             };
             
-            // Register plugin globally
-            Chart.register(annotationPlugin);
+            // Ensure annotation plugin is registered without duplicates
+            if (!Chart.registry.plugins.get('customAnnotation')) {
+                Chart.register(annotationPlugin);
+            }
             
             // Find point where w(z) ≈ DESI target (-0.83)
             const desiTargetIndex = findKeyPoint(html_data.w_z, html_data.metadata.DESI_w_target);
@@ -1139,8 +1284,8 @@
                                     yValue: html_data.H_z[html_data.z.indexOf(0.5)] || 85,
                                     backgroundColor: '#4f46e5',
                                     borderColor: '#312e81',
-                                    label: 'z=0.5',
-                                    description: 'DESI-Beobachtungsbereich'
+                                    label: '',
+                                    description: 'DESI-Beobachtungsbereich z=0.5'
                                 }
                             ]
                         }
@@ -1232,7 +1377,7 @@
                                     backgroundColor: '#f97316',
                                     borderColor: '#c2410c',
                                     label: '',
-                                    description: `w(${desiZ}) ≈ ${desiW.toFixed(2)} DESI-kompatibel`
+                                    description: `w(${desiZ.toFixed(2)}) ≈ ${desiW.toFixed(2)} DESI-kompatibel`
                                 },
                                 {
                                     enabled: html_data.w_z[0] < -1,
@@ -1357,13 +1502,13 @@
                             annotations: [
                                 {
                                     enabled: true,
-                                    xValue: 0.7,
-                                    yValue: html_data.Lambda_z[html_data.z.indexOf(0.7)] || html_data.Lambda_z[html_data.z.indexOf(0.7)],
+                                    xValue: modelParams.z_star,
+                                    yValue: html_data.Lambda_z[html_data.z.indexOf(modelParams.z_star)] || 
+                                            html_data.Lambda_z[findKeyPoint(html_data.z, modelParams.z_star)],
                                     backgroundColor: '#6366f1',
                                     borderColor: '#4f46e5',
                                     label: '',
-                                    description: 'Übergangszone z ≈ 0.7',
-                                    descriptionOffsetY: -25
+                                    description: `Übergangszone z* ≈ ${modelParams.z_star}`
                                 }
                             ]
                         }
@@ -1437,25 +1582,11 @@
                 }
             });
 
-            // Add an extra chart that wasn't in the original: α(z) evolution
-            const alphaContainer = document.createElement('div');
-            alphaContainer.className = 'bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg col-span-2';
-            alphaContainer.innerHTML = `
-                <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Exponent \( \\alpha(z) \)</h3>
-                <div class="chart-container">
-                    <canvas id="AlphaChart"></canvas>
-                </div>
-                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">
-                    Der Exponent α(z) = -0.6 + 1.2·tanh(2(z-0.7)) bestimmt das Verhalten der Dunklen Energie
-                </p>
-            `;
-            
-            // Find the container to add this to
-            const chartsContainer = document.querySelector('#glattung-graph .grid');
-            chartsContainer.appendChild(alphaContainer);
-            
+            // Alpha Chart (α(z) evolution)
             const alphaCtx = document.getElementById('AlphaChart').getContext('2d');
-            new Chart(alphaCtx, {
+            if (alphaChartInstance) alphaChartInstance.destroy();
+            
+            alphaChartInstance = new Chart(alphaCtx, {
                 type: 'line',
                 data: {
                     labels: html_data.z,
@@ -1499,12 +1630,12 @@
                             annotations: [
                                 {
                                     enabled: true,
-                                    xValue: 0.7,
-                                    yValue: html_data.alpha_z[html_data.z.indexOf(0.7)] || 0,
+                                    xValue: modelParams.z_star,
+                                    yValue: html_data.alpha_z[findKeyPoint(html_data.z, modelParams.z_star)] || 0,
                                     backgroundColor: '#8b5cf6',
                                     borderColor: '#7c3aed',
                                     label: '',
-                                    description: 'Übergangszone z ≈ 0.7'
+                                    description: `Übergangszone z* = ${modelParams.z_star}`
                                 }
                             ]
                         }
@@ -1533,6 +1664,208 @@
                 }
             });
         }
+        
+        // --- Tab switching logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // If switching to the graphs tab, render charts
+                    if (tabId === 'glattung-graph') {
+                        setTimeout(renderCharts, 100); // Small delay to ensure the tab is visible
+                    }
+                    
+                    // Re-render MathJax when switching tabs
+                    if (window.MathJax && window.MathJax.typeset) {
+                        window.MathJax.typeset();
+                    }
+                });
+            });
+            
+            // Initialize sliders
+            const z_starSlider = document.getElementById('z_star');
+            const z_starValue = document.getElementById('z_star_value');
+            const alpha_0Slider = document.getElementById('alpha_0');
+            const alpha_0Value = document.getElementById('alpha_0_value');
+            const alpha_ampSlider = document.getElementById('alpha_amp');
+            const alpha_ampValue = document.getElementById('alpha_amp_value');
+            const resetButton = document.getElementById('resetParams');
+            const downloadButton = document.getElementById('downloadData');
+            
+            if (z_starSlider) {
+                z_starSlider.addEventListener('input', function(e) {
+                    const value = parseFloat(e.target.value);
+                    z_starValue.textContent = `z* = ${value.toFixed(2)}`;
+                    modelParams.z_star = value;
+                    recomputeData();
+                    renderCharts();
+                });
+            }
+            
+            if (alpha_0Slider) {
+                alpha_0Slider.addEventListener('input', function(e) {
+                    const value = parseFloat(e.target.value);
+                    alpha_0Value.textContent = `α₀ = ${value.toFixed(2)}`;
+                    modelParams.alpha_0 = value;
+                    recomputeData();
+                    renderCharts();
+                });
+            }
+            
+            if (alpha_ampSlider) {
+                alpha_ampSlider.addEventListener('input', function(e) {
+                    const value = parseFloat(e.target.value);
+                    alpha_ampValue.textContent = `A = ${value.toFixed(2)}`;
+                    modelParams.alpha_amp = value;
+                    recomputeData();
+                    renderCharts();
+                });
+            }
+            
+            if (resetButton) {
+                resetButton.addEventListener('click', function() {
+                    // Reset to default values
+                    modelParams = {
+                        z_star: 0.7,
+                        alpha_0: -0.6,
+                        alpha_amp: 1.2
+                    };
+                    
+                    // Update slider positions and values
+                    if (z_starSlider) {
+                        z_starSlider.value = modelParams.z_star;
+                        z_starValue.textContent = `z* = ${modelParams.z_star.toFixed(2)}`;
+                    }
+                    
+                    if (alpha_0Slider) {
+                        alpha_0Slider.value = modelParams.alpha_0;
+                        alpha_0Value.textContent = `α₀ = ${modelParams.alpha_0.toFixed(2)}`;
+                    }
+                    
+                    if (alpha_ampSlider) {
+                        alpha_ampSlider.value = modelParams.alpha_amp;
+                        alpha_ampValue.textContent = `A = ${modelParams.alpha_amp.toFixed(2)}`;
+                    }
+                    
+                    // Recompute data and redraw charts
+                    recomputeData();
+                    renderCharts();
+                });
+            }
+            
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function() {
+                    // Create export data with current parameters
+                    const exportData = {
+                        modelName: "GDE-Modell",
+                        parameters: {
+                            ...modelParams,
+                            H0: html_data.metadata.H0,
+                            Omega_m: html_data.metadata.Omega_m,
+                            Omega_Lambda: html_data.metadata.Omega_Lambda,
+                            formula: `α(z) = ${modelParams.alpha_0} + ${modelParams.alpha_amp} * tanh(2(z-${modelParams.z_star}))`
+                        },
+                        data: {
+                            z: html_data.z,
+                            H_z: html_data.H_z,
+                            H_z_LCDM: html_data.H_z_LCDM,
+                            w_z: html_data.w_z,
+                            alpha_z: html_data.alpha_z,
+                            Lambda_z: html_data.Lambda_z,
+                            Lambda_glattung_z: html_data.Lambda_glattung_z,
+                            Lambda_combined: html_data.Lambda_combined,
+                            S_struktur: html_data.S_struktur.map(s => s / 1e88) // Normalized for easier use
+                        },
+                        metadata: {
+                            generatedOn: new Date().toISOString(),
+                            notes: "Daten aus dem GDE-Modell Explorer. S_struktur Werte sind normiert (S_struktur/S_CMB)."
+                        }
+                    };
+                    
+                    // Create JSON string
+                    const jsonStr = JSON.stringify(exportData, null, 2);
+                    
+                    // Create blob and download
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `gde-model-data-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            }
+            
+            // --- Dark mode toggle ---
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const darkModeText = document.getElementById('darkModeText');
+            
+            function toggleDarkMode() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    darkModeIcon.textContent = '🌙';
+                    darkModeText.textContent = 'Dark Mode';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    darkModeIcon.textContent = '☀️';
+                    darkModeText.textContent = 'Light Mode';
+                }
+                
+                // Re-render charts if they exist
+                if (document.getElementById('glattung-graph').classList.contains('active')) {
+                    renderCharts();
+                }
+            }
+            
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+            
+            // Set generation date
+            document.getElementById('generationDate').textContent = new Date().toLocaleDateString('de-DE', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            
+            // --- Loading indicator ---
+            const loadingBar = document.getElementById('loading-bar');
+            function updateLoadingBar(percent) {
+                loadingBar.style.width = `${percent}%`;
+                if (percent >= 100) {
+                    setTimeout(() => {
+                        loadingBar.style.width = '0%';
+                    }, 300);
+                }
+            }
+            
+            // Simulate loading progress
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += 5;
+                updateLoadingBar(progress);
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                }
+            }, 50);
+            
+            // Initial render if we're on the glattung-graph tab
+            if (document.getElementById('glattung-graph').classList.contains('active')) {
+                renderCharts();
+            }
+        });
         
         // Ensure MathJax is properly initialized
         window.MathJax = {

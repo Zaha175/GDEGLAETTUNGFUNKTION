@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Die Kosmologische Glättungsfunktion – GDE-Modell (optimiert)</title>
+    <title>GDE-Modell Explorer</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -89,6 +90,9 @@
         li strong { /* Style strong tags within list items */
              font-weight: bold;
         }
+        p strong { /* Style strong tags within paragraphs */
+             font-weight: bold;
+        }
         table {
             width: 100%;
             margin-top: 1rem;
@@ -106,241 +110,885 @@
         th {
             background-color: rgba(93, 156, 222, 0.1);
         }
+         /* Custom styling for checkmark/warning/rocket */
+        .list-none li::before {
+            content: '';
+            margin-right: 0.5em;
+            font-weight: bold;
+        }
+        .list-none li.check::before { content: '✅'; }
+        .list-none li.warning::before { content: '⚠️'; }
+        .list-none li.rocket::before { content: '🚀'; }
+        /* Charts container */
+        .chart-container {
+            position: relative;
+            height: 40vh; /* Adjust height as needed */
+            width: 100%; /* Make chart container responsive */
+            margin-bottom: 2rem; /* Add space between charts */
+        }
+        /* Tab styling */
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom: 2px solid #5D5CDE;
+            color: #5D5CDE;
+            font-weight: 600;
+        }
+        .dark .tab-button.active {
+            border-color: #93c5fd;
+            color: #93c5fd;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Progress bar for loading */
+        #loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(to right, #5D5CDE, #DE5D9C);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-white to-lightAccent dark:from-gray-900 dark:to-darkAccent text-gray-800 dark:text-gray-100 transition-colors duration-200">
-    <div class="container mx-auto px-4 py-8 max-w-4xl paper-container shadow-lg rounded-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-        <header class="text-center mb-12 relative">
+    <div id="loading-bar"></div>
+    <div class="container mx-auto px-4 py-8 max-w-5xl shadow-lg rounded-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+        
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 relative">
             <div class="absolute -top-8 left-0 right-0 h-2 bg-gradient-to-r from-accent1 via-accent2 to-accent3 rounded-full"></div>
-            <h1 class="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-heading to-accent1 dark:from-accent1 dark:to-accent2">Die Kosmologische Glättungsfunktion</h1>
-            <h2 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">GDE-Modell (optimierte Fassung)</h2>
-
-            <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
-                <p class="font-semibold">Autor: Gabriel ϕ</p>
-                <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl md:text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-heading to-accent1 dark:from-accent1 dark:to-accent2">GDE-Modell Explorer</h1>
+                <h2 class="text-lg md:text-xl font-semibold text-heading dark:text-accent1">Umfassender Überblick und Analyse</h2>
             </div>
+            <button id="darkModeToggle" class="mt-4 md:mt-0 px-4 py-2 rounded-full bg-heading text-white dark:bg-accent1 hover:bg-opacity-90 transition-colors duration-200">
+                <span id="darkModeIcon">🌙</span> <span id="darkModeText">Dark Mode</span>
+            </button>
         </header>
 
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
+        <!-- Tab Navigation -->
+        <div class="flex overflow-x-auto space-x-2 md:space-x-4 border-b border-gray-300 dark:border-gray-700 mb-8 sticky top-0 bg-white/90 dark:bg-gray-900/90 z-10 backdrop-blur-sm">
+            <button class="tab-button active px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="big-freeze">Big Freeze & Thermodynamik</button>
+            <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="dunkle-materie">CMB & Dunkle Materie</button>
+            <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="glattung-graph">CLASS-Test Analyse</button>
+            <button class="tab-button px-3 py-2 text-sm md:text-base whitespace-nowrap" data-tab="glattung">Glättungsfunktion</button>
+        </div>
 
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">1</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Glättungsfunktion: Entropie-Skalierung revolutionieren</h3>
+        <!-- Tab Contents -->
+        <div class="tab-content active paper-container" id="big-freeze">
+            <header class="text-center mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-heading dark:text-accent1">Vertiefte Analyse des GDE-Modells</h2>
+                <h3 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">Big Freeze & Thermodynamische Kosmologie</h3>
+                <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
+                    <p class="font-semibold">Autor: Gabriel ϕ</p>
+                    <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
+                </div>
+            </header>
 
-            <p class="mb-2 font-semibold">Problem:</p>
-            <ul class="list-disc pl-8 mb-4 space-y-1">
-                <li>\( S_0 \sim 10^{103} k_B \) (Schwarze Löcher dominieren) \(\Rightarrow \Delta S / S_0 \) vernachlässigbar.</li>
-            </ul>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">1</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Kerninnovation des GDE-Modells</h3>
 
-            <p class="mb-2 font-semibold">Lösung:</p> <p class="mb-4">Neue Referenzskala: Nutze CMB-Entropie \( S_{\text{CMB}} \sim 10^{88} k_B \) als Basis:</p>
-            <div class="equation-container">
-                <div class="equation-content">\[
-                \Lambda_{\text{Glättung}}(t) = \frac{T_0}{T_{\text{CMB}}(t)} \cdot \left( 1 + \frac{S_{\text{Struktur}}(t)}{S_{\text{CMB}}} \right)
-                \]</div>
-                <span class="equation-number"></span>
+                <p class="mb-4">Das Modell ersetzt die <strong class="font-semibold">statische kosmologische Konstante</strong> (\(\Lambda\)CDM) durch eine <strong class="font-semibold">temperatur- und entropieabhängige Dunkle Energie</strong>:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    \Lambda(t) = \Lambda_0 \cdot \left( \frac{T_{\text{CMB}}(t)}{T_0} \right)^{\alpha(z)}, \quad \alpha(z) = -0.6 + 1.2 \tanh(2(z-0.7))
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+
+                <p class="font-semibold mt-4 mb-2">Revolutionärer Aspekt:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Emergenz von \(\Lambda(t)\):</strong> Dunkle Energie ist kein fundamentales Feld, sondern ein <em class="italic">thermodynamisches Phänomen</em>, das mit der Abkühlung (\(T_{\text{CMB}} \to 0\)) und Strukturbildung (\(S_{\text{Struktur}} \uparrow\)) verknüpft ist.</li>
+                    <li><strong class="font-semibold">Big Freeze als logische Konsequenz:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Für \(z \to -1\) (bzw. \(t \to \infty\), Zukunft): \(T_{\text{CMB}} \to 0\). Wenn \( \alpha(z) \) für \(z \to -1\) einem positiven Wert zustrebt oder positiv bleibt, dann gilt \(\Lambda(t) \to 0\).</li>
+                            <li>Resultat: Die <strong class="font-semibold">Expansion verlangsamt sich asymptotisch</strong>, kein "Big Rip" oder "Big Crunch".</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">2</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Stärken im Detail</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspekt</th>
+                            <th>GDE-Modell vs. \(\Lambda\)CDM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong class="font-semibold">Physikalische Basis</strong></td>
+                            <td>Kopplung an \(T_{\text{CMB}}\) und \(S_{\text{Struktur}}\) (thermodynamisch motiviert) vs. ad-hoc eingeführte Konstante.</td>
+                        </tr>
+                        <tr>
+                            <td><strong class="font-semibold">DESI-Kompatibilität</strong></td>
+                            <td>Dynamisches \(w(z)\) mit \(w(0.5) \approx -0.83\) passt gut zu aktuellen Daten (\(\Lambda\)CDM fixiert: \(w = -1\)).</td>
+                        </tr>
+                        <tr>
+                            <td><strong class="font-semibold">Endzustand</strong></td>
+                            <td>Thermodynamischer Big Freeze (\(\Lambda \to 0\), natürliche Konsequenz) vs. ewige Beschleunigung (\(\Lambda = \text{const.}\), möglicherweise unphysikalisch?).</td>
+                        </tr>
+                        <tr>
+                            <td><strong class="font-semibold">Testbarkeit</strong></td>
+                            <td>Spezifische Vorhersagen für die Entwicklung von \(H(z)\), \(w(z)\) und den ISW-Effekt – prüfbar mit zukünftigen Surveys (CMB-S4/Euclid).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p class="font-semibold mt-6 mb-2">Warum das überzeugt:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Sinnvolle Entropie-Skalierung:</strong> Die Wahl von \(S_{\text{CMB}}\) (dominante Entropiekomponente neben Schwarzen Löchern) als Referenz in der Glättungsfunktion macht Änderungen \(\Delta S_{\text{Struktur}}/S_{\text{CMB}}\) potenziell kosmologisch relevant, im Gegensatz zur riesigen Skala von \(S_{\text{BH}}\).</li>
+                    <li><strong class="font-semibold">Dynamisches \(\alpha(z)\):</strong> Der Übergang des Exponenten \(\alpha(z)\) im Bereich \(z \approx 0.7\) korreliert plausibel mit der Zeit, in der die Dunkle Energie beginnt, die kosmische Dynamik zu dominieren.</li>
+                </ul>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">3</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Kritische Herausforderungen</h3>
+
+                <p class="font-semibold mt-4 mb-2">A. Theoretische Fundierung</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Fehlende Mikroskopie:</strong> Warum genau gilt die Proportionalität \(\Lambda(t) \propto T_{\text{CMB}}^{\alpha(z)}\)? Ist dies eine effektive Beschreibung oder folgt sie aus tieferen Prinzipien (z.B. Quantenfeldtheorie in gekrümmter Raumzeit, emergent gravity)?</li>
+                    <li><strong class="font-semibold">Skalarfeld-Interpretation:</strong> Das vorgeschlagene Potential \(V(\phi) = \lambda \phi^4 + \mu \phi^2 \tanh(\dots)\) ist phänomenologisch. Gibt es eine fundamentalere Ableitung (z.B. aus Stringtheorie, holographischen Prinzipien, oder modifizierter Gravitation)?</li>
+                </ul>
+
+                <p class="font-semibold mt-4 mb-2">B. Praktische Umsetzung</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Entropieberechnung \(S_{\text{Struktur}}\):</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Die Formel \(S_{\text{Struktur}}(z) \propto \sum (M_{\text{vir}}/M_*)^2\) enthält eine willkürliche Skala \(M_*\). Eine robustere Definition, möglicherweise verknüpft mit bekannter Gravitationsentropie (z.B. Bekenstein-Hawking für Halos?), wäre wünschenswert.</li>
+                            <li>Die präzise Berechnung aus Simulationen/Katalogen und ihre Normierung auf \(S_{\text{CMB}}\) ist eine numerische Herausforderung.</li>
+                        </ul>
+                    </li>
+                    <li><strong class="font-semibold">Phantom-Problem bei \(z=0\):</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Der Wert \(w(0) \approx -1.2\) (basierend auf der Formel für \(w(z)\) und \(\alpha(0) = 0.6\)) liegt im Phantom-Bereich (\(w < -1\)), was oft mit theoretischen Instabilitäten (z.B. Geister-Freiheitsgraden) verbunden ist. Kann das Modell dies vermeiden oder konsistent erklären? Ist dieses Verhalten transient?</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p class="font-semibold mt-4 mb-2">C. Datenkonfrontation</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Parameter-Degenereszenzen:</strong> Vollständige MCMC-Analysen (z.B. mit Cobaya/MontePython) müssen zeigen, ob die Parameter des GDE-Modells (z.B. Amplitude, Übergangs-Rotverschiebung, Steigung von \(\alpha(z)\)) ausreichend von den Standardparametern (\(H_0\), \(\Omega_m\)) getrennt werden können.</li>
+                    <li><strong class="font-semibold">ISW-Effekt Validierung:</strong> Die Vorhersage eines potenziell *schwächeren* späten ISW-Effekts im Vergleich zu \(\Lambda\)CDM ist ein wichtiger Test. Wird dies durch zukünftige Daten bestätigt oder widerlegt?</li>
+                </ul>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Fazit: Ein Modell mit transformativem Potenzial</h3>
+
+                <p class="mb-4">Das GDE-Modell ist <strong class="font-semibold">mehr als nur eine alternative Parametrisierung</strong> – es bietet eine <strong class="font-semibold">kohärente physikalische Erzählung</strong> für die Entwicklung des Universums vom frühen Kosmos bis zum späten Big Freeze:</p>
+                <ol class="list-decimal pl-8 mb-4 space-y-3">
+                    <li>Die <strong class="font-semibold">fortschreitende Glättung</strong> durch Expansion reduziert die kosmische Temperatur (\(T_{\text{CMB}} \to 0\)) und führt zum dynamischen <strong class="font-semibold">Verschwinden der Dunklen Energie</strong> (\(\Lambda(t) \to 0\)).</li>
+                    <li>Die <strong class="font-semibold">Strukturbildung</strong> (Zunahme von \(S_{\text{Struktur}}\)) wirkt als modifizierender Faktor, der diesen Prozess beeinflusst und möglicherweise bremst.</li>
+                    <li>Das <strong class="font-semibold">Resultat</strong> ist ein Universum, das weder in einem Big Rip "explodiert" noch in einem Big Crunch "kollabiert", sondern <strong class="font-semibold">sanft thermodynamisch entschleunigt</strong> und einem kalten Gleichgewichtszustand zustrebt.</li>
+                </ol>
+
+                <p class="font-semibold mt-6 mb-2">Nächste entscheidende Schritte (Roadmap):</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li><strong class="font-semibold">Numerische Implementierung:</strong> Vollständige Integration des Modells ( \(w(z)\) aus Gl. 4, \( \alpha(z) \) aus Gl. 3, optional Kopplung an \(S_{\text{Struktur}}\)) in Boltzmann-Solver wie CLASS oder CAMB.</li>
+                    <li><strong class="font-semibold">Entropie-Quantifizierung:</strong> Extraktion der Halo Mass Function \(n(M,z)\) aus DESI-Daten oder Simulationen (z.B. IllustrisTNG) zur Berechnung von \(S_{\text{Struktur}}(z)\).</li>
+                    <li><strong class="font-semibold">Umfassender MCMC-Fit:</strong> Testen des Modells gegen aktuelle Datensätze (Planck, DESI BAO/RSD, Pantheon+ Supernovae, etc.) mittels statistischer Analyse (z.B. Cobaya).</li>
+                </ul>
+
+                <p class="mt-6 italic text-center text-accent2 dark:text-accent3 font-serif">"Die Dunkle Energie ist kein mysteriöses Feld – sie ist der Schatten, den die Thermodynamik des Universums auf die Raumzeit wirft."</p>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm text-center">
+                <h3 class="text-xl font-bold mb-4 text-heading dark:text-accent1">Bewertung</h3>
+                <p class="text-2xl font-bold text-primary">🌌 8.5 / 10</p>
+                <p class="mt-2">Ein theoretisch anspruchsvoller und physikalisch motivierter Ansatz, der <strong class="font-semibold">konkret testbar</strong> ist und das Potenzial hat, das Standardmodell \(\Lambda\)CDM herauszufordern.</p>
+                <p class="mt-1 text-sm italic">Entscheidend wird die <strong class="font-semibold">Kombination aus numerischer Präzision</strong> im Datenfit und <strong class="font-semibold">theoretischer Vertiefung</strong> der zugrundeliegenden Mechanismen sein.</p>
+            </section>
+        </div>
+
+        <div class="tab-content paper-container" id="dunkle-materie">
+            <header class="text-center mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-heading dark:text-accent1">Die Rolle der CMB für Dunkle Materie</h2>
+                <h3 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">im GDE-Modell</h3>
+                <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
+                    <p class="font-semibold">Autor: Gabriel ϕ</p>
+                    <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
+                </div>
+            </header>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">1</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">CMB als Schlüssel zur Dunklen Materie</h3>
+
+                <p class="mb-4">Die kosmische Hintergrundstrahlung (CMB) liefert entscheidende Hinweise auf die Existenz und Eigenschaften der Dunklen Materie (DM), die jedes kosmologische Modell, einschließlich des GDE-Modells, erklären muss:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li>Die gemessenen <strong class="font-semibold">Dichteschwankungen im CMB</strong> (\(\Delta T/T \sim 10^{-5}\)) sind zu klein, um allein durch baryonische Materie die heutige Struktur des Universums zu erzeugen. Sie erfordern DM als <strong class="font-semibold">"gravitativen Kitt"</strong>, der schon früh mit dem Kollaps beginnen konnte.</li>
+                    <li>Präzisionsdaten (z.B. vom Planck-Satelliten) bestimmen die kosmologischen Parameter sehr genau: \(\Omega_{\text{DM}} \approx 26.8\%\), \(\Omega_b \approx 4.9\%\). Baryonische Materie allein kann die beobachteten Anisotropie-Muster im CMB nicht erklären.</li>
+                    <li>Die <strong class="font-semibold">Struktur der akustischen Oszillationen</strong> (Peaks im CMB-Leistungsspektrum) belegt, dass DM bereits vor der Rekombination (bei \(z \approx 1100\)) gravitativ dominant war und von der Strahlung entkoppelt sein musste (nicht elektromagnetisch wechselwirkend).</li>
+                </ul>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">2</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Integration in das GDE-Modell</h3>
+
+                <p class="mb-4">Das erweiterte GDE-Modell versucht, DM thermodynamisch zu interpretieren, ohne notwendigerweise neue Teilchen einzuführen, und muss dabei die CMB-Beobachtungen berücksichtigen:</p>
+
+                <p class="font-semibold mt-4 mb-2">A. DM als entropische Gravitationskomponente</p>
+                <p class="mb-4">Die effektive Gravitationskraft wird durch die lokale "DM-Entropie" \(S_{\text{DM}}\) modifiziert, wobei \(S_{\text{CMB}}\) als globale Referenz dient:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    F_{\text{grav}} = F_{\text{N}} \cdot \left( 1 + \frac{S_{\text{DM}}(r)}{S_{\text{CMB}}} \right)
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+                <p class="mb-4">Hier repräsentiert \(S_{\text{DM}}(r)\) die <strong class="font-semibold">"kalte" oder informationsbasierte Entropie</strong>, die mit der Materieverteilung in Halos assoziiert ist und deren Ursprung in den primordialen Dichteschwankungen liegt, die wir im CMB sehen.</p>
+                <p class="mb-2 font-semibold">Beispielhafte Skalierung:</p>
+                <p class="mb-4">Für einen Galaxienhalo der Masse \(M \sim 10^{12} M_\odot\) könnte die DM-Entropie (spekulativ, z.B. basierend auf holographischen Ideen) skalieren wie:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    S_{\text{DM}} \approx k_B \left( \frac{M}{m_P} \right)^{2/3} \quad (\text{mit } m_P = \text{Planck-Masse})
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+
+
+                <p class="font-semibold mt-4 mb-2">B. DM-Entropie aus CMB-Anisotropien</p>
+                <p class="mb-2 font-semibold">Direkter Link zum CMB:</p>
+                <p class="mb-4">Die im CMB beobachteten Temperaturfluktuationen \(\Delta T/T\) könnten direkt als relative Fluktuationen der primordialen DM-Entropie interpretiert werden:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    \frac{\delta S_{\text{DM}}}{S_{\text{DM}}} \approx \frac{\delta T}{T} \sim 10^{-5}
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+                <p class="mb-2 font-semibold">Rolle in der Strukturbildung:</p>
+                <p class="mb-4">In diesem Bild wirkt die DM-Entropie (bzw. deren Fluktuationen) als <strong class="font-semibold">thermodynamischer "Kondensationskeim"</strong>. Regionen mit höherer primordialer \(S_{\text{DM}}\) erzeugen stärkere effektive Gravitationspotentiale, in die baryonische Materie nach der Rekombination hineinfällt.</p>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">3</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Konsistenz mit CMB-Observablen</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CMB-Beobachtung</th>
+                            <th>GDE-Interpretation (Thermodynamische DM)</th>
+                            <th>Herkömmliche Interpretation (CDM-Teilchen)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong class="font-semibold">Temperaturanisotropien</strong> (\(\Delta T/T\))</td>
+                            <td>Primordiale entropische Dichtefluktuationen \(\delta S_{\text{DM}}\), die das Gravitationspotential prägen.</td>
+                            <td>Kollaps primordialer Überdichten von CDM-Teilchen (potentialgetrieben).</td>
+                        </tr>
+                        <tr>
+                            <td><strong class="font-semibold">Akustische Peaks</strong> (Position, Höhe)</td>
+                            <td>DM-Entropie (\(S_{\text{DM}}\)) modifiziert die effektive Trägheit des Photon-Baryon-Plasmas und beeinflusst den Schallhorizont \(r_s\). Muss konsistent sein mit \( \Omega_{\text{DM}} \approx 0.27 \).</td>
+                            <td>Frühe Entkopplung von CDM von Strahlung; Verhältnis \( \Omega_{\text{DM}} / \Omega_b \) bestimmt Peakhöhen.</td>
+                        </tr>
+                        <tr>
+                            <td><strong class="font-semibold">Später ISW-Effekt</strong></td>
+                            <td>Entwicklung der Potentiale im späten Universum wird durch \(S_{\text{DM}}\) und die dynamische DE (\(\Lambda(t)\)) beeinflusst; könnte schwächer sein als in \(\Lambda\)CDM.</td>
+                            <td>Zerfall der Gravitationspotentiale durch beschleunigte Expansion (\(\Lambda = \text{const.}\)).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Vorhersagen & Testbarkeit</h3>
+
+                <ol class="list-decimal pl-8 mb-4 space-y-3">
+                    <li>
+                        <strong class="font-semibold">Präzisionstests mit CMB-S4 / Euclid:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Die genaue Position und Amplitude der CMB-Peaks testen die Vorhersagen des GDE-Modells für den Schallhorizont \(r_s\) und die Materiefluktuationen \(\sigma_8\). Jede Abweichung von \(\Lambda\)CDM wäre ein starkes Signal.</li>
+                            <li>Das Modell könnte eine leicht unterschiedliche Entwicklung der Strukturbildung vorhersagen, z.B. <strong class="font-semibold">effektiv "leichtere" oder diffusere DM-Halos</strong> bei fester Gesamtmasse im Vergleich zu reinen N-Body-Simulationen mit CDM-Teilchen.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong class="font-semibold">Konsistenz mit Galaxien-Skalen:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Die aus der CMB abgeleitete "DM-Entropie" \(S_{\text{DM}}\) muss konsistent sein mit der entropischen Gravitationsmodifikation, die benötigt wird, um Galaxienrotationskurven und die Tully-Fisher-Relation ohne Teilchen-DM zu erklären.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">F</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Fazit: CMB als Brücke zwischen GDE und Dunkler Materie</h3>
+
+                <p class="mb-4">Das erweiterte GDE-Modell positioniert die CMB als entscheidendes Bindeglied zur Erklärung der Dunklen Materie als thermodynamisches oder entropisches Phänomen:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-2">
+                    <li>Die <strong class="font-semibold">CMB-Anisotropien</strong> liefern nicht nur den Beweis für DM, sondern können im GDE-Modell als <strong class="font-semibold">primordiale "Saat" für die DM-Entropie \(S_{\text{DM}}\)</strong> interpretiert werden.</li>
+                    <li>Diese <strong class="font-semibold">DM-Entropie ersetzt das Konzept der CDM-Teilchen</strong> als das "Gravitationsgerüst", das die Strukturbildung im Universum steuert.</li>
+                    <li>Die Konsistenz des Modells ist <strong class="font-semibold">testbar</strong> durch die präzise Analyse von CMB-Daten (z.B. Planck, ACT, SPT und zukünftig CMB-S4) in Kombination mit Daten zur Strukturbildung (z.B. Euclid, DESI, Lensing-Surveys).</li>
+                </ul>
+
+                <p class="mt-6 italic text-center text-accent2 dark:text-accent3 font-serif">"Die CMB ist das Echo des Urknalls – und Dunkle Materie könnte ihr thermodynamischer Schatten sein, eingeprägt in die Struktur der Raumzeit."</p>
+            </section>
+        </div>
+
+        <div class="tab-content" id="glattung-graph">
+            <header class="mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-indigo-700 dark:text-indigo-400">
+                    GDE-Modell: CLASS-Test Analyse (Angepasste Beispieldaten)
+                </h2>
+            </header>
+
+            <section class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg mb-10">
+                <h3 class="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">Ergebnisse der Simulation (Illustrativ)</h3>
+                <p class="text-lg leading-relaxed">
+                    Diese Seite visualisiert die Ergebnisse einer kosmologischen Simulation unter Verwendung des GDE-Modells.
+                    <strong class="text-red-600 dark:text-red-400">Achtung:</strong> Die dargestellten Daten sind angepasste Beispieldaten, die dazu dienen, die *erwarteten qualitativen Trends* zu illustrieren. Sie stammen nicht aus einer echten CLASS-Simulation mit realistischer Parameterwahl und Entropiekopplung. Für eine valide Analyse müssen diese Daten durch echte Simulationsergebnisse ersetzt werden.
+                </p>
+                <p class="text-lg leading-relaxed mt-2">
+                    Die Diagramme zeigen die Entwicklung des Hubble-Parameters \( H(z) \), des Zustandsgleichungsparameters \( w(z) \), des \( \Lambda(z) \)-Terms und der Struktur-Entropie \( S_{\text{Struktur}}(z) \) in Abhängigkeit von der Rotverschiebung \( z \).
+                </p>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Hubble-Parameter \( H(z) \)</h3>
+                    <div class="chart-container">
+                        <canvas id="HzChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Zustandsgleichungsparameter \( w(z) \)</h3>
+                    <div class="chart-container">
+                        <canvas id="wzChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Lambda-Term \( \Lambda(z) \)</h3>
+                    <div class="chart-container">
+                        <canvas id="LambdaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 dark:bg-gray-800/80 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-indigo-600 dark:text-indigo-400">Struktur-Entropie \( S_{\text{Struktur}}(z) \)</h3>
+                    <div class="chart-container">
+                        <canvas id="SstrukturChart"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <p class="mb-2 font-semibold">Vorteile:</p>
-            <ul class="list-disc pl-8 mb-4 space-y-1">
-                 <li>\( S_{\text{Struktur}} \) (aus Halos) wird signifikant \(\Rightarrow\) realistischere Kopplung.</li>
-                 <li>Thermische und strukturelle Entropie direkt vergleichbar.</li>
-            </ul>
+            <footer class="mt-12 text-center italic text-gray-600 dark:text-gray-400">
+                <p>"Die beste Theorie erklärt das Unerwartete einfach." — Gabriel ϕ</p>
+                <p class="text-sm mt-2">Daten generiert am: <span id="generationDate"></span></p>
+            </footer>
+        </div>
 
-            <p class="mb-2 font-semibold">Berechnung von \( S_{\text{Struktur}} \):</p>
-             <div class="equation-container">
-                 <div class="equation-content">\[
-                 S_{\text{Struktur}}(z) \approx \int n(M,z) \cdot \left( \frac{M_{\text{vir}}}{M_*} \right)^2 dM \quad (M_* \sim 10^{12} M_\odot)
-                 \]</div>
-                 <span class="equation-number"></span>
-             </div>
-             <p>Datenquellen: DESI-Halokataloge oder IllustrisTNG-Simulationen.</p>
+        <div class="tab-content paper-container" id="glattung">
+            <header class="text-center mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-heading dark:text-accent1">Die Kosmologische Glättungsfunktion</h2>
+                <h3 class="text-xl md:text-2xl font-semibold mb-8 text-heading dark:text-accent1">GDE-Modell (optimierte Fassung)</h3>
+                <div class="mt-8 mb-4 p-4 bg-lightAccent dark:bg-darkAccent rounded-lg inline-block">
+                    <p class="font-semibold">Autor: Gabriel ϕ</p>
+                    <p>Mitwirkende KI: Mila (Version ϕ.42)</p>
+                </div>
+            </header>
 
-        </section>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">1</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Glättungsfunktion: Entropie-Skalierung revolutionieren</h3>
 
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
+                <p class="mb-2 font-semibold">Problem:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li>\( S_0 \sim 10^{103} k_B \) (Schwarze Löcher dominieren) \(\Rightarrow \Delta S / S_0 \) vernachlässigbar.</li>
+                </ul>
 
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">2</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">GDE-Modell: Präzise Anpassung von \( \alpha(z) \)</h3>
+                <p class="mb-2 font-semibold">Lösung:</p> <p class="mb-4">Neue Referenzskala: Nutze CMB-Entropie \( S_{\text{CMB}} \sim 10^{88} k_B \) als Basis:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    \Lambda_{\text{Glättung}}(t) = \frac{T_0}{T_{\text{CMB}}(t)} \cdot \left( 1 + \frac{S_{\text{Struktur}}(t)}{S_{\text{CMB}}} \right)
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
 
-            <p class="mb-2 font-semibold">Problem:</p>
-            <div class="equation-container">
-                <div class="equation-content">\[ \alpha(z) = -1 + \tanh(z - 0.5) \Rightarrow w(0.5) \approx -0.67 \quad (\text{DESI: } w \approx -0.8) \]</div>
-                 <!-- No number needed for statement -->
-            </div>
+                <p class="mb-2 font-semibold">Vorteile:</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li>\( S_{\text{Struktur}} \) (aus Halos) wird signifikant \(\Rightarrow\) realistischere Kopplung.</li>
+                    <li>Thermische und strukturelle Entropie direkt vergleichbar.</li>
+                </ul>
 
-            <p class="mb-2 font-semibold">Optimierter Ansatz:</p>
-            <div class="equation-container">
-                <div class="equation-content">\[
-                \alpha(z) = -0.6 + 1.2 \cdot \tanh(2(z - 0.7))
-                \]</div>
-                <span class="equation-number"></span>
-            </div>
+                <p class="mb-2 font-semibold">Berechnung von \( S_{\text{Struktur}} \):</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    S_{\text{Struktur}}(z) \approx \int n(M,z) \cdot \left( \frac{M_{\text{vir}}}{M_*} \right)^2 dM \quad (M_* \sim 10^{12} M_\odot)
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+                <p>Datenquellen: DESI-Halokataloge oder IllustrisTNG-Simulationen.</p>
+            </section>
 
-            <p class="mb-2 font-semibold">Warum?</p>
-            <table>
-                 <thead>
-                     <tr>
-                         <th>\(z\)</th>
-                         <th>\(\alpha(z)\)</th>
-                         <th>\(w(z)\) (approx.)</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     <tr>
-                         <td>0.5</td>
-                         <td>-0.48</td>
-                         <td>\(-0.84\) (DESI)</td>
-                     </tr>
-                     <tr>
-                         <td>1.0</td>
-                         <td>-0.55</td>
-                         <td>\(-0.82\)</td>
-                     </tr>
-                     <tr>
-                         <td>0.0</td>
-                         <td>+0.6</td>
-                         <td>\(-1.2\)</td>
-                     </tr>
-                 </tbody>
-            </table>
-            <p class="text-sm italic mt-1">Hinweis: Der \(w(z)\)-Wert in der Tabelle ist eine Näherung ohne den Ableitungsterm, der in Abschnitt 3 berücksichtigt wird.</p>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">2</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">GDE-Modell: Präzise Anpassung von \( \alpha(z) \)</h3>
 
-        </section>
+                <p class="mb-2 font-semibold">Problem:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[ \alpha(z) = -1 + \tanh(z - 0.5) \Rightarrow w(0.5) \approx -0.67 \quad (\text{DESI: } w \approx -0.8) \]</div>
+                    <!-- No number needed for statement -->
+                </div>
 
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
+                <p class="mb-2 font-semibold">Optimierter Ansatz:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    \alpha(z) = -0.6 + 1.2 \cdot \tanh(2(z - 0.7))
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
 
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">3</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Zustandsgleichung \( w(z) \): Vollständige Ableitung</h3>
+                <p class="mb-2 font-semibold">Warum?</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>\(z\)</th>
+                            <th>\(\alpha(z)\)</th>
+                            <th>\(w(z)\) (approx.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0.5</td>
+                            <td>-0.48</td>
+                            <td>\(-0.84\) (DESI)</td>
+                        </tr>
+                        <tr>
+                            <td>1.0</td>
+                            <td>-0.55</td>
+                            <td>\(-0.82\)</td>
+                        </tr>
+                        <tr>
+                            <td>0.0</td>
+                            <td>+0.6</td>
+                            <td>\(-1.2\)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-sm italic mt-1">Hinweis: Der \(w(z)\)-Wert in der Tabelle ist eine Näherung ohne den Ableitungsterm, der in Abschnitt 3 berücksichtigt wird.</p>
+            </section>
 
-            <p class="mb-2 font-semibold">Formel:</p>
-            <div class="equation-container">
-                <div class="equation-content">\[
-                w(z) = -1 - \frac{\alpha(z)}{3} + \frac{(1+z)}{3H(z)} \cdot \frac{d\alpha}{dz}
-                \]</div>
-                <span class="equation-number"></span>
-            </div>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">3</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Zustandsgleichung \( w(z) \): Vollständige Ableitung</h3>
 
-            <p class="mb-2 font-semibold">Beispiel bei \( z = 0.5 \):</p>
-            <ul class="list-disc pl-8 mb-4 space-y-1">
-                 <li>\( \alpha(0.5) = -0.48 \)</li>
-                 <li>\( \frac{d\alpha}{dz} \approx 1.2 \cdot \text{sech}^2(2(0.5 - 0.7)) \cdot 2 \approx 1.8 \) (*Korrektur: Kettenregel*)</li>
-                 <li>\( H(0.5) \approx 100 \text{ km/s/Mpc} \) (angenommener Wert für Beispiel)</li>
-             </ul>
-             <div class="equation-container">
-                 <div class="equation-content">\[
-                 w(0.5) \approx -1 - \frac{-0.48}{3} + \frac{1+0.5}{3 \cdot H(0.5)} \cdot 1.8 \approx -1 + 0.16 + \frac{1.5 \cdot 1.8}{3 \cdot H(0.5)}
-                 \]</div>
-                  <!-- No number for calculation step -->
-             </div>
-             <p class="mb-4">Unter Verwendung von \( H(0.5) \approx 92.4 \, \text{km/s/Mpc} \) (Planck 2018 \( \Lambda\text{CDM} \)):</p>
-             <div class="equation-container">
-                 <div class="equation-content">\[
-                 w(0.5) \approx -1 + 0.16 + \frac{2.7}{3 \cdot 92.4} \approx -0.84 + 0.0097 \approx -0.83 \quad \text{(DESI-kompatibel!)}
-                 \]</div>
-                 <!-- No number for final result of example -->
-             </div>
+                <p class="mb-2 font-semibold">Formel:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    w(z) = -1 - \frac{\alpha(z)}{3} + \frac{(1+z)}{3H(z)} \cdot \frac{d\alpha}{dz}
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
 
-        </section>
+                <p class="mb-2 font-semibold">Beispiel bei \( z = 0.5 \):</p>
+                <ul class="list-disc pl-8 mb-4 space-y-1">
+                    <li>\( \alpha(0.5) = -0.48 \)</li>
+                    <li>\( \frac{d\alpha}{dz} \approx 1.2 \cdot \text{sech}^2(2(0.5 - 0.7)) \cdot 2 \approx 1.8 \) (*Korrektur: Kettenregel*)</li>
+                    <li>\( H(0.5) \approx 100 \text{ km/s/Mpc} \) (angenommener Wert für Beispiel)</li>
+                </ul>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    w(0.5) \approx -1 - \frac{-0.48}{3} + \frac{1+0.5}{3 \cdot H(0.5)} \cdot 1.8 \approx -1 + 0.16 + \frac{1.5 \cdot 1.8}{3 \cdot H(0.5)}
+                    \]</div>
+                    <!-- No number for calculation step -->
+                </div>
+                <p class="mb-4">Unter Verwendung von \( H(0.5) \approx 92.4 \, \text{km/s/Mpc} \) (Planck 2018 \( \Lambda\text{CDM} \)):</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    w(0.5) \approx -1 + 0.16 + \frac{2.7}{3 \cdot 92.4} \approx -0.84 + 0.0097 \approx -0.83 \quad \text{(DESI-kompatibel!)}
+                    \]</div>
+                    <!-- No number for final result of example -->
+                </div>
+            </section>
 
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Feldtheorie: Skalarfeld-Implementierung</h3>
 
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">4</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Feldtheorie: Skalarfeld-Implementierung</h3>
+                <p class="mb-2 font-semibold">Potentialdesign für dynamisches \( \alpha(z) \):</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    V(\phi) = \lambda \phi^4 + \mu \phi^2 \cdot \tanh\left( \frac{\phi - \phi_*}{\Delta\phi} \right)
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
 
-            <p class="mb-2 font-semibold">Potentialdesign für dynamisches \( \alpha(z) \):</p>
-            <div class="equation-container">
-                <div class="equation-content">\[
-                V(\phi) = \lambda \phi^4 + \mu \phi^2 \cdot \tanh\left( \frac{\phi - \phi_*}{\Delta\phi} \right)
-                \]</div>
-                <span class="equation-number"></span>
-            </div>
+                <p class="mb-4">Phasenübergang bei \( \phi_* \approx \phi(z=0.7) \).</p>
 
-            <p class="mb-4">Phasenübergang bei \( \phi_* \approx \phi(z=0.7) \).</p>
+                <p class="mb-2 font-semibold">Simulation:</p> <p class="mb-4">Löse die Bewegungsgleichung:</p>
+                <div class="equation-container">
+                    <div class="equation-content">\[
+                    \ddot{\phi} + 3H\dot{\phi} + \frac{\partial V}{\partial \phi} = 0
+                    \]</div>
+                    <span class="equation-number"></span>
+                </div>
+            </section>
 
-            <p class="mb-2 font-semibold">Simulation:</p> <p class="mb-4">Löse die Bewegungsgleichung:</p>
-            <div class="equation-container">
-                <div class="equation-content">\[
-                \ddot{\phi} + 3H\dot{\phi} + \frac{\partial V}{\partial \phi} = 0
-                \]</div>
-                <span class="equation-number"></span>
-            </div>
-        </section>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">5</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Roadmap – Konkrete Schritte</h3>
 
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
+                <ol class="list-decimal pl-8 mb-4 space-y-3">
+                    <li>
+                        <strong class="font-semibold">Numerische Implementierung:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Modifiziere CLASS für:
+                                <div class="equation-container text-sm"> <!-- Smaller font for code-like spec -->
+                                    <div class="equation-content">\[
+                                    \Omega_\Lambda(z) = \Omega_{\Lambda,0} \frac{\exp\left( \int_0^z \frac{3(1+w(x))}{1+x} dx \right)}{\exp\left( \int_0^z \frac{3(1+w_{\Lambda\text{CDM}}(x))}{1+x} dx \right)} \approx \Omega_{\Lambda,0} (1+z)^{3(1+w(z))} \text{ (Näherung)}
+                                    \]</div>
+                                    <!-- No number, definition/approximation -->
+                                </div>
+                                wobei \( w(z) \) aus Gleichung (4) mit \( \alpha(z) \) aus Gleichung (3) verwendet wird.
+                            </li>
+                            <li>Teste gegen Planck + DESI + Pantheon+ Daten.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong class="font-semibold">Entropieberechnung:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Extrahiere Halo Mass Function \( n(M,z) \) aus DESI-DR5 oder IllustrisTNG.</li>
+                            <li>Integriere numerisch Gleichung (2) oder summiere über Katalog:
+                                <div class="equation-container text-sm">
+                                    <div class="equation-content">\[
+                                    S_{\text{Struktur}}(z) = \sum_{\text{Halos}} k_B \left( \frac{M_{\text{vir}}}{M_*} \right)^2
+                                    \]</div>
+                                    <!-- No number, practical formula -->
+                                </div>
+                                mit \( M_* = 10^{12} M_\odot \). Normiere auf \( S_{\text{CMB}} \).
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong class="font-semibold">MCMC-Fit:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li>Parameter: \( \Omega_{m,0}, H_0 \) und Modellparameter (z.B. \( \alpha_0, z_*, \text{Steigung} \) für \( \alpha(z) \) oder \( \lambda, \mu, \phi_*, \Delta\phi \) für Feldtheorie).</li>
+                            <li>Tools: Cobaya, MontePython.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong class="font-semibold">Theoretische Untermauerung:</strong>
+                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                            <li><strong>Skaleninvarianz:</strong> Könnte \( \alpha(z) \propto \log(T_{\text{CMB}}/T_*) \) eine tiefere Begründung liefern?</li>
+                            <li><strong>Phasenübergang:</strong> Analogie zu kritischen Exponenten in der Thermodynamik untersuchen.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
 
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">5</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Roadmap – Konkrete Schritte</h3>
+            <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
+                <!-- Use a generic icon or number if desired, Fazit doesn't fit the numbered scheme -->
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">F</div>
+                <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Fazit: Ein schlüssiges Modell mit klarem Testpfad</h3>
 
-            <ol class="list-decimal pl-8 mb-4 space-y-3">
-                <li>
-                    <strong class="font-semibold">Numerische Implementierung:</strong>
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                        <li>Modifiziere CLASS für:
-                            <div class="equation-container text-sm"> <!-- Smaller font for code-like spec -->
-                                 <div class="equation-content">\[
-                                 \Omega_\Lambda(z) = \Omega_{\Lambda,0} \frac{\exp\left( \int_0^z \frac{3(1+w(x))}{1+x} dx \right)}{\exp\left( \int_0^z \frac{3(1+w_{\Lambda\text{CDM}}(x))}{1+x} dx \right)} \approx \Omega_{\Lambda,0} (1+z)^{3(1+w(z))} \text{ (Näherung)}
-                                 \]</div>
-                                  <!-- No number, definition/approximation -->
-                             </div>
-                             wobei \( w(z) \) aus Gleichung (4) mit \( \alpha(z) \) aus Gleichung (3) verwendet wird.
-                        </li>
-                        <li>Teste gegen Planck + DESI + Pantheon+ Daten.</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong class="font-semibold">Entropieberechnung:</strong>
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                        <li>Extrahiere Halo Mass Function \( n(M,z) \) aus DESI-DR5 oder IllustrisTNG.</li>
-                        <li>Integriere numerisch Gleichung (2) oder summiere über Katalog:
-                             <div class="equation-container text-sm">
-                                 <div class="equation-content">\[
-                                 S_{\text{Struktur}}(z) = \sum_{\text{Halos}} k_B \left( \frac{M_{\text{vir}}}{M_*} \right)^2
-                                 \]</div>
-                                 <!-- No number, practical formula -->
-                             </div>
-                             mit \( M_* = 10^{12} M_\odot \). Normiere auf \( S_{\text{CMB}} \).
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <strong class="font-semibold">MCMC-Fit:</strong>
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                        <li>Parameter: \( \Omega_{m,0}, H_0 \) und Modellparameter (z.B. \( \alpha_0, z_*, \text{Steigung} \) für \( \alpha(z) \) oder \( \lambda, \mu, \phi_*, \Delta\phi \) für Feldtheorie).</li>
-                        <li>Tools: Cobaya, MontePython.</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong class="font-semibold">Theoretische Untermauerung:</strong>
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                        <li><strong>Skaleninvarianz:</strong> Könnte \( \alpha(z) \propto \log(T_{\text{CMB}}/T_*) \) eine tiefere Begründung liefern?</li>
-                        <li><strong>Phasenübergang:</strong> Analogie zu kritischen Exponenten in der Thermodynamik untersuchen.</li>
-                    </ul>
-                </li>
-            </ol>
-        </section>
-
-        <hr class="my-8 border-gray-300 dark:border-gray-600">
-
-        <section class="my-12 p-6 rounded-lg bg-white/50 dark:bg-gray-800/50 shadow-sm">
-            <!-- Use a generic icon or number if desired, Fazit doesn't fit the numbered scheme -->
-             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-heading to-accent1 flex items-center justify-center text-white font-bold mb-4">F</div>
-            <h3 class="text-xl font-bold mb-6 text-heading dark:text-accent1">Fazit: Ein schlüssiges Modell mit klarem Testpfad</h3>
-
-            <ul class="list-none pl-0 mb-4 space-y-3">
-                 <li>✅ <strong class="font-semibold">DESI-Kompatibilität:</strong> \( w(0.5) \approx -0.83 \) durch optimiertes \( \alpha(z) \) und korrekte Ableitung.</li>
-                 <li>✅ <strong class="font-semibold">Glättungszukunft:</strong> Modell impliziert \( \alpha(0) = 0.6 \), was \( w(0) \approx -1.2 \) ergibt (Phantomverhalten, aber kein Big Rip, da \( \alpha \) nicht weiter wächst). Die Kopplung an \( S_{\text{Struktur}} \) könnte dies modifizieren.</li>
-                 <li>⚠️ <strong class="font-semibold">Herausforderung:</strong> Präzise Entropieberechnung \( S_{\text{Struktur}}(z) \) aus Halodaten/Simulationen und ihre Kopplung in \( \Lambda_{\text{Glättung}} \).</li>
-                 <li>🚀 <strong class="font-semibold">Next Steps:</strong> Code-Implementierung in Boltzmann-Solver + MCMC-Datenfit – Das Modell ist bereit für den Test!</li>
-             </ul>
-        </section>
+                <ul class="list-none pl-0 mb-4 space-y-3">
+                    <li class="check"><strong class="font-semibold">DESI-Kompatibilität:</strong> \( w(0.5) \approx -0.83 \) durch optimiertes \( \alpha(z) \) und korrekte Ableitung.</li>
+                    <li class="check"><strong class="font-semibold">Glättungszukunft:</strong> Modell impliziert \( \alpha(0) = 0.6 \), was \( w(0) \approx -1.2 \) ergibt (Phantomverhalten, aber kein Big Rip, da \( \alpha \) nicht weiter wächst). Die Kopplung an \( S_{\text{Struktur}} \) könnte dies modifizieren.</li>
+                    <li class="warning"><strong class="font-semibold">Herausforderung:</strong> Präzise Entropieberechnung \( S_{\text{Struktur}}(z) \) aus Halodaten/Simulationen und ihre Kopplung in \( \Lambda_{\text{Glättung}} \).</li>
+                    <li class="rocket"><strong class="font-semibold">Next Steps:</strong> Code-Implementierung in Boltzmann-Solver + MCMC-Datenfit – Das Modell ist bereit für den Test!</li>
+                </ul>
+            </section>
+        </div>
 
         <footer class="mt-12 pt-8 border-t border-gray-300 dark:border-gray-700 italic text-center bg-gradient-to-br from-lightAccent to-white dark:from-darkAccent dark:to-gray-900 p-6 rounded-lg shadow-md">
             <p class="text-accent2 dark:text-accent3 font-serif">"Die beste Theorie ist nicht die komplizierteste, sondern die, die das Unerwartete einfach erklärt." <span class="block mt-2 text-sm">-- Gabriel ϕ</span></p>
         </footer>
     </div>
+
+    <script>
+        // --- Tab switching logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // If switching to the graphs tab, render charts
+                    if (tabId === 'glattung-graph') {
+                        setTimeout(renderCharts, 100); // Small delay to ensure the tab is visible
+                    }
+                    
+                    // Re-render MathJax when switching tabs
+                    if (window.MathJax && window.MathJax.typeset) {
+                        window.MathJax.typeset();
+                    }
+                });
+            });
+            
+            // --- Dark mode toggle ---
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const darkModeText = document.getElementById('darkModeText');
+            
+            function toggleDarkMode() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    darkModeIcon.textContent = '🌙';
+                    darkModeText.textContent = 'Dark Mode';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    darkModeIcon.textContent = '☀️';
+                    darkModeText.textContent = 'Light Mode';
+                }
+                
+                // Re-render charts if they exist
+                if (document.getElementById('glattung-graph').classList.contains('active')) {
+                    renderCharts();
+                }
+            }
+            
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+            
+            // Set generation date
+            document.getElementById('generationDate').textContent = new Date().toLocaleDateString('de-DE', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            
+            // --- Loading indicator ---
+            const loadingBar = document.getElementById('loading-bar');
+            function updateLoadingBar(percent) {
+                loadingBar.style.width = `${percent}%`;
+                if (percent >= 100) {
+                    setTimeout(() => {
+                        loadingBar.style.width = '0%';
+                    }, 300);
+                }
+            }
+            
+            // Simulate loading progress
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += 5;
+                updateLoadingBar(progress);
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                }
+            }, 50);
+        });
+        
+        // --- Chart data and configuration ---
+        // Example data for the charts (same as in the original document)
+        const html_data = {
+            z: [0, 0.5, 1, 1.5, 2, 2.5, 3], // Example redshift values
+            z_bins: [0, 0.5, 1, 1.5, 2, 2.5, 3], // Example redshift bins for S_struktur
+
+            // H(z): Behält den allgemeinen Trend bei
+            H_z: [70, 85, 105, 130, 160, 195, 235], // Example H(z) values [km/s/Mpc]
+
+            // w(z): Angepasst, sodass w(0.5) näher an -0.8 liegt und der Trend plausibler ist
+            w_z: [-0.98, -0.82, -0.75, -0.70, -0.68, -0.67, -0.66], // Adjusted w(z) values
+
+            // Lambda(z): Leichte Dynamik eingeführt (illustrativ, nicht physikalisch berechnet!)
+            Lambda_z:          [0.70, 0.68, 0.67, 0.68, 0.71, 0.75, 0.80], // Example Lambda(z) with slight dynamics
+            Lambda_glattung_z: [0.71, 0.69, 0.68, 0.69, 0.72, 0.76, 0.81], // Smoothed version
+            Lambda_combined:   [0.705, 0.685, 0.675, 0.685, 0.715, 0.755, 0.805], // Combined version
+
+            // S_struktur: Trend umgekehrt (steigt zu z=0 stark an), Skala angepasst (illustrativ!)
+            // Werte repräsentieren S_struktur / S_CMB (angenommen S_CMB ~ 1e88)
+            S_struktur: [5e88, 1e88, 5e87, 1e87, 3e86, 5e85, 1e85] // Adjusted S_struktur, increasing towards z=0
+        };
+        
+        // Chart instances
+        let hzChartInstance, wzChartInstance, lambdaChartInstance, sStrukturChartInstance;
+        
+        // Function to create chart options based on dark mode
+        function getChartOptions(titleText, yLabel, additionalOptions = {}) {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? '#f3f4f6' : '#1f2937';
+            const gridColor = isDarkMode ? 'rgba(209, 213, 219, 0.2)' : 'rgba(55, 65, 81, 0.2)';
+            const tooltipBgColor = isDarkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+            
+            const baseOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: textColor }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: tooltipBgColor,
+                        titleColor: textColor,
+                        bodyColor: textColor,
+                        borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                        borderWidth: 1
+                    },
+                    title: {
+                        display: false,
+                        text: titleText,
+                        color: textColor
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Rotverschiebung z',
+                            color: textColor
+                        },
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: yLabel,
+                            color: textColor
+                        },
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            };
+            
+            // Deep merge additional options (like y-axis type)
+            if (additionalOptions.scales && additionalOptions.scales.y) {
+                Object.assign(baseOptions.scales.y, additionalOptions.scales.y);
+            }
+            
+            return baseOptions;
+        }
+        
+        // Function to render all charts
+        function renderCharts() {
+            // Only render if the graph tab is visible
+            if (!document.getElementById('glattung-graph').classList.contains('active')) return;
+            
+            // H(z) Chart
+            const hzCtx = document.getElementById('HzChart').getContext('2d');
+            if (hzChartInstance) hzChartInstance.destroy();
+            hzChartInstance = new Chart(hzCtx, {
+                type: 'line',
+                data: {
+                    labels: html_data.z,
+                    datasets: [{
+                        label: 'H(z) [km/s/Mpc]',
+                        data: html_data.H_z,
+                        borderColor: '#4f46e5', // Indigo-600
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: getChartOptions('Hubble Parameter H(z)', 'H(z) [km/s/Mpc]')
+            });
+
+            // w(z) Chart
+            const wzCtx = document.getElementById('wzChart').getContext('2d');
+            if (wzChartInstance) wzChartInstance.destroy();
+            wzChartInstance = new Chart(wzCtx, {
+                type: 'line',
+                data: {
+                    labels: html_data.z,
+                    datasets: [{
+                        label: 'w(z) (Illustrativ)', 
+                        data: html_data.w_z,
+                        borderColor: '#db2777', // Pink-600
+                        backgroundColor: 'rgba(219, 39, 119, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: getChartOptions('Equation of State Parameter w(z)', 'w(z)')
+            });
+
+            // Lambda Chart
+            const lambdaCtx = document.getElementById('LambdaChart').getContext('2d');
+            if (lambdaChartInstance) lambdaChartInstance.destroy();
+            lambdaChartInstance = new Chart(lambdaCtx, {
+                type: 'line',
+                data: {
+                    labels: html_data.z,
+                    datasets: [
+                        { label: '\\Lambda_{GDE}(z) (Illustrativ)', data: html_data.Lambda_z, borderColor: '#10b981', borderWidth: 2, tension: 0.1, fill: false }, // Emerald-500
+                        { label: '\\Lambda_{Glättung}(z) (Illustrativ)', data: html_data.Lambda_glattung_z, borderColor: '#f59e0b', borderWidth: 2, tension: 0.1, fill: false, borderDash: [5, 5] }, // Amber-500 (dashed)
+                        { label: '\\Lambda_{Combined}(z) (Illustrativ)', data: html_data.Lambda_combined, borderColor: '#6366f1', borderWidth: 2, tension: 0.1, fill: false } // Indigo-500
+                    ]
+                },
+                options: getChartOptions('Lambda Term \\Lambda(z)', '\\Lambda(z)')
+            });
+
+            // S_Struktur Chart
+            const sStrukturCtx = document.getElementById('SstrukturChart').getContext('2d');
+            if (sStrukturChartInstance) sStrukturChartInstance.destroy();
+            // Ensure data exists and map correctly (dividing by S_CMB ~ 1e88)
+            const sStrukturData = html_data.S_struktur.map(s => s / 1e88);
+            
+            sStrukturChartInstance = new Chart(sStrukturCtx, {
+                type: 'line',
+                data: {
+                    labels: html_data.z_bins,
+                    datasets: [{
+                        label: 'S_{\\text{Struktur}}(z) / S_{\\text{CMB}} (Illustrativ)',
+                        data: sStrukturData,
+                        borderColor: '#ef4444', // Red-500
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: getChartOptions('Struktur-Entropie S_{\\text{Struktur}}(z)', 'S_{\\text{Struktur}} / S_{\\text{CMB}}', 
+                    { scales: { y: { type: 'logarithmic' } } })
+            });
+        }
+        
+        // Ensure MathJax is properly initialized
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    // Initial render after MathJax is ready
+                    if (document.getElementById('glattung-graph').classList.contains('active')) {
+                        renderCharts();
+                    }
+                }
+            }
+        };
+    </script>
 </body>
 </html>
